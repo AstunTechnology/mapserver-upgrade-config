@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-from duplicity.tempdir import default
+
 
 
 # open the MapFile
@@ -98,20 +98,20 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("inputfile", type=str, help="the map file to be processed")
-    parser.add_argument("-o","--outputfile", type=str, help="the file to write output to (stdout if missing)", default="")
+    parser.add_argument("-o", "--outputfile", type=str, help="the file to write output to (stdout if missing)", default="")
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-t","--tabs", help="use tabs instead of spaces", action="store_true", default=False)
-    group.add_argument("-w","--width", help="number of spaces for indentation", default=2, type=int)
+    group.add_argument("-t", "--tabs", help="use tabs instead of spaces", action="store_true", default=False)
+    group.add_argument("-w", "--width", help="number of spaces for indentation", default=2, type=int)
     
     args = parser.parse_args()
     
     use_tabs = False
     if args.tabs:
-        use_tabs=True
+        use_tabs = True
         print use_tabs
     # copy to backup and run fix
     # shutil.copy(infile, backup)
-    fixer = fix_mapfile(args.inputfile,tabs=use_tabs,output_file=args.outputfile,width=args.width)
+    fixer = fix_mapfile(args.inputfile, tabs=use_tabs, output_file=args.outputfile, width=args.width)
     fixer.fix()
      
 
