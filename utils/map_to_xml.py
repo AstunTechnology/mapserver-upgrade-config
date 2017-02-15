@@ -206,17 +206,13 @@ class map_to_xml(object):
                                 self.makeSubElement(class_, s, k)           
                         class_ = self.sortChildren(class_, class_)        
                 
-                elif "metadatas" == key:
+                elif "metadata" == key:
                     meta = etree.SubElement(layer, "Metadata")
-                    c = l["metadatas"]
+                    c = l[key]
                     
                     for kx in c:
-                        for k in kx:
-                            if k == '__type__':
-                                pass
-                            else:
-                                item = etree.SubElement(meta, "item", name=l[k][0].replace("'", "").replace("\"", ""))
-                                item.text = l[k][1].replace("'", "").replace("\"", "")
+                        item = etree.SubElement(meta, "item", name=kx.replace("'", "").replace("\"", ""))
+                        item.text = c[kx].replace("'", "").replace("\"", "")
                 elif "validation" == key:
                     validation = etree.SubElement(layer, "Validation")
                     for k in l["validation"]:
@@ -282,16 +278,26 @@ class map_to_xml(object):
         scalebars = self.sortChildren(scalebars, scalebars)
     
     def makeConfig(self, root, mapp, mapkey):
-        # this currently doesn't find any but the last config - needs a mod in mappyfile!
-        
+                
         el = etree.SubElement(root, "Config")
         for k in mapp[mapkey].keys():
-            item = etree.SubElement(el, "item", name=k[0])
-            item.text = k[1]
+            item = etree.SubElement(el, "item", name=k.replace("'", "").replace("\"", ""))
+            item.text = mapp[mapkey][k]
+    
+    def makeSymbols(self, root, mapp, mapkey):
+        for k in mapp[mapkey]:
+            el = etree.SubElement(root, "Symbol")
+            for d in k:
+                if d == 'name':
+                    el.set("name",k['name'].replace("'", "").replace("\"", ""))
+                elif d == 'type':
+                    el.set("type",k['type'].replace("'", "").replace("\"", ""))
+                else:
+                    self.makeSubElement(el, k, d)
     
 
     def sortChildren(self, root, new_root):
-        temp = sorted(set(root), key=lambda x:attrgetter('tag')(x).lower())
+        temp = sorted(root, key=lambda x:attrgetter('tag')(x).lower())
         for x in temp:
             new_root.append(x)
         
@@ -332,6 +338,8 @@ class map_to_xml(object):
                 self.makeScalebars(root, mapp, mapkey)
             elif mapkey == 'config':
                 self.makeConfig(root, mapp, mapkey)
+            elif mapkey == 'symbols':
+                self.makeSymbols(root, mapp, mapkey)
             elif 'name' == mapkey:
                 root.set("name",mapp['name'])
             elif 'status' == mapkey:
@@ -343,7 +351,7 @@ class map_to_xml(object):
         root = self.sortChildren(root, etree.Element("Map", nsmap={None:"http://www.mapserver.org/mapserver"},
                              name=input_file, version="5.6"))
                              
-        print(etree.tostring(root, pretty_print=True))
+        print(etree.tostring(root, pretty_print=True ))
         self.map_root = root
        
             
@@ -353,19 +361,12 @@ def main():
 
     parser.add_argument("inputfile", type=str, help="the map file to be processed")
     parser.add_argument("-o", "--outputfile", type=str, help="the file to write output to (stdout if missing)", default="")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-t", "--tabs", help="use tabs instead of spaces", action="store_true", default=False)
-    group.add_argument("-w", "--width", help="number of spaces for indentation", default=2, type=int)
+    
     
     args = parser.parse_args()
     
-    use_tabs = False
-    if args.tabs:
-        use_tabs = True
-        print use_tabs
-    # copy to backup and run fix
-    # shutil.copy(infile, backup)
-    mapper = map_to_xml(args.inputfile, tabs=use_tabs, output_file=args.outputfile, width=args.width)
+    
+    mapper = map_to_xml(args.inputfile,  output_file=args.outputfile)
     
     # for el in mapper.map_root:
         # print el
