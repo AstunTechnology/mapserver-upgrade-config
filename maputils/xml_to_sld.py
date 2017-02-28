@@ -6,7 +6,7 @@ Created on 8 Feb 2017
 
 import argparse
 import sys
- 
+from lxml.etree import Element, SubElement, tostring, QName
 
 
 
@@ -16,8 +16,22 @@ import sys
 import lxml.etree as ET
 import os
 
-class xml_to_sld(object):
 
+class XQName(QName):
+    def __init__(self,uri,tag=None):
+        if tag is None:
+            tag = uri
+        super(QName, self).__init__(self,uri,tag)
+        if uri is None:
+            self.uri = tag
+        elif tag is None:
+            self.tag = uri
+        else:
+            self.text = '{'+uri+'}'+tag
+
+    
+class xml_to_sld(object):
+    
 
     def set_color(self, target, color):
         colors = []
@@ -276,49 +290,69 @@ class xml_to_sld(object):
         literal = ET.SubElement(f,"{http://www.opengis.net/ogc}Literal")
         literal.text = exprText
         
-    def __init__(self, input_file):
+    def __init__(self, input_file, root=None):
         self.input = input_file
-        
+        nsmap={None:"http://www.mapserver.org/mapserver"}
         self.layers = {} 
-       
+        self.layer_info = {}
         #read in xml 
-        tree=ET.parse(input_file)
-        root = tree.getroot()
+        if root is None:
+            tree=ET.parse(input_file)
+            root = tree.getroot()
+    
+        ns = root.nsmap[None]
+        
+        
+        # for some reason the tree has no namespace on the tags when passed in 
+        # directly instead of being parsed.
+        # so fix it!
+        for x in root.getiterator():
+            if not '{' in x.tag:
+                x.tag = "{"+ns+"}"+x.tag
+                
+            
         self.symbols = {}
-        for symbol in root.iter('{http://www.mapserver.org/mapserver}Symbol'):
+        for symbol in root.iterfind(QName(ns, 'Symbol')):
             self.symbols[symbol.attrib['name']] = symbol
            
-        for layer in root.iter('{http://www.mapserver.org/mapserver}Layer'):
+        
+        layerRef = QName(ns, 'Layer')
+        #print "LayerRef="+layerRef.text
+        for layer in root.iterfind(layerRef): #
             layer_type =layer.attrib['type']
             layer_name = layer.attrib['name']
             class_item = layer.find('classItem')
-            #print str(layer_type) +" "+str(layer_name)+ " "+str(class_item)
+            #print str(layer_type) +" "+str(layer_name)
             sld = ET.Element("FeatureTypeStyle",nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"}) 
-            for class_ in layer.iter('{http://www.mapserver.org/mapserver}Class'):
+            for class_ in layer.iterfind(QName(ns, 'Class')):
                 rule = ET.SubElement(sld, "Rule")
+                if 'name' in class_.attrib and not class_.attrib['name'] == '':
+                    rule.set("name",class_.attrib['name'])
+                    #print "name "+class_.attrib['name']
                 #filter
-                classitem = layer.find("{http://www.mapserver.org/mapserver}classItem")
+                classitem = layer.find(QName(ns, 'classItem'))
                 if classitem is not None:
-                    
-                    expression = class_.find("{http://www.mapserver.org/mapserver}expression")
-                    self.makeFilter(rule,classitem,expression)
+                    expression = class_.find(QName(ns, 'expression'))
+                    if expression is not None:
+                        
+                        self.makeFilter(rule,classitem,expression)
                 #scale denoms
-                minscale = layer.find("{http://www.mapserver.org/mapserver}minScaleDenom")
+                minscale = layer.find(QName(ns, 'minScaleDenom'))
                 if minscale is not None:
                     mins = ET.SubElement(rule,"MinScaleDenominator")
                     mins.text = minscale.text
-                maxscale = layer.find("{http://www.mapserver.org/mapserver}maxScaleDenom")
+                maxscale = layer.find(QName(ns, 'maxScaleDenom'))
                 if maxscale is not None:
                     maxs = ET.SubElement(rule,"MaxScaleDenominator")
                     maxs.text = maxscale.text
                 
                 
-                for style in class_.iter('{http://www.mapserver.org/mapserver}Style'):
-                    minscale = style.find("{http://www.mapserver.org/mapserver}labelMinScaleDenom")
+                for style in class_.iterfind(QName(ns, 'Style')):
+                    minscale = style.find(QName(ns, 'labelMinScaleDenom'))
                     if minscale is not None:
                         mins = ET.SubElement(rule,"MinScaleDenominator")
                         mins.text = minscale.text
-                    maxscale = style.find("{http://www.mapserver.org/mapserver}labelMaxScaleDenom")
+                    maxscale = style.find(QName(ns, 'labelMaxScaleDenom'))
                     if maxscale is not None:
                         maxs = ET.SubElement(rule,"MaxScaleDenominator")
                         maxs.text = maxscale.text
@@ -337,19 +371,19 @@ class xml_to_sld(object):
                     else:
                         print "Unknown layer type "+str(layer_type) + " for "+str(layer_name)
                         
-                for label in class_.iter('{http://www.mapserver.org/mapserver}Label'):
-                    minscale = layer.find("{http://www.mapserver.org/mapserver}labelMinScaleDenom")
+                for label in class_.iterfind(QName(ns, 'Label')):
+                    minscale = layer.find(QName(ns, 'labelMinScaleDenom'))
                     if minscale is not None:
                         mins = ET.SubElement(rule,"MinScaleDenominator")
                         mins.text = minscale.text
-                    maxscale = layer.find("{http://www.mapserver.org/mapserver}labelMaxScaleDenom")
+                    maxscale = layer.find(QName(ns, 'labelMaxScaleDenom'))
                     if maxscale is not None:
                         maxs = ET.SubElement(rule,"MaxScaleDenominator")
                         maxs.text = maxscale.text
                     self.getLabel(layer, sld, rule, label)
             #ET.dump(sld)
             self.layers[layer.attrib['name']] = sld
-                           
+            self.layer_info[layer.attrib['name']] = layer               
                            
     def getLayer(self,name):
         if name in self.layers:
@@ -368,7 +402,9 @@ def main():
     
     sldStore = xml_to_sld(args.inputfile)
     
-    ET.dump(sldStore.getLayer("dynamics_db"))
+    for layer in sldStore.layers:
+        print layer
+        ET.dump(sldStore.getLayer(layer))
     
     
     # for el in mapper.map_root:

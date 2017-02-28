@@ -351,10 +351,11 @@ class map_to_xml(object):
         root = self.sortChildren(root, etree.Element("Map", nsmap={None:"http://www.mapserver.org/mapserver"},
                              name=input_file, version="5.6"))
                              
-        print(etree.tostring(root, pretty_print=True ))
+        
         self.map_root = root
        
-            
+    def print_map(self):
+        print(etree.tostring(self.map_root, pretty_print=True ))    
         
 def main():
     parser = argparse.ArgumentParser()
@@ -367,7 +368,7 @@ def main():
     
     
     mapper = map_to_xml(args.inputfile,  output_file=args.outputfile)
-    
+    mapper.print_map()
     # for el in mapper.map_root:
         # print el
      
