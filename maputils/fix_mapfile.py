@@ -78,6 +78,12 @@ class fix_mapfile:
                                 print self.generate_indent(indent) + p
                             indent -= 1
                             print self.generate_indent(indent) + "END"
+                        else:
+                            print self.generate_indent(indent) + "VALIDATION"
+                            indent += 1
+                            print self.generate_indent(indent) + '"qstring_validation_pattern" "."'
+                            indent -= 1
+                            print self.generate_indent(indent) + "END"
                         line = ''  # dispose of spare END
                         pattern_line = []
                         
