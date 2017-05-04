@@ -44,25 +44,33 @@ class fix_mapfile:
         """prints the fixed file to std out or output file
     
         """
+        in_layer = False
+        any_meta = False
         in_meta = False
         indent = 0;
+        in_count = 0;
         pattern_line = ""
         with open(self.input) as fp:
             for line in fp:
                 sline = line.strip().lower()
                 if sline in self.openings:              
-                    
+                    if('layer' in sline):
+                        in_layer = True
+                        any_meta = False
+                        in_count = 0
                     if('metadata' in sline):
                         in_meta = True
+                        any_meta = True
                         lines = []
                         pattern_line = []
                     else:
                         print self.generate_indent(indent) + line.strip();
                     indent += 1
+                    in_count+= 1
                     line = '' 
                         
                 
-                if(sline == 'end'):
+                if(sline == 'end'): 
                     indent -= 1   
                     if(in_meta):
                         in_meta = False
@@ -78,19 +86,29 @@ class fix_mapfile:
                                 print self.generate_indent(indent) + p
                             indent -= 1
                             print self.generate_indent(indent) + "END"
-                        else:
+                        elif in_layer:
                             print self.generate_indent(indent) + "VALIDATION"
                             indent += 1
-                            print self.generate_indent(indent) + '"qstring_validation_pattern" "."'
+                            print self.generate_indent(indent) + '"qstring" "."'
                             indent -= 1
                             print self.generate_indent(indent) + "END"
                         line = ''  # dispose of spare END
                         pattern_line = []
-                        
+                    if in_layer and in_count == 0 and not any_meta:
+                        print self.generate_indent(indent) + "VALIDATION"
+                        indent += 1
+                        print self.generate_indent(indent) + '"qstring_validation_pattern" "."'
+                        indent -= 1
+                        print self.generate_indent(indent) + "END"
+                    in_count-=1
+                    
                 if 'validation_pattern' in sline:
                     bits = sline.split('_')
                     pattern = bits[-1].split()[-1]
-                    pattern_line.append(bits[0] + '" ' + pattern)
+                    start=''
+                    if not bits[0].startswith('"'):
+                        start='"'
+                    pattern_line.append(start+bits[0] + '" ' + pattern)
                     line = ''  # delete the line from the input
                         
                 if (line.rstrip() != '' and not in_meta):
