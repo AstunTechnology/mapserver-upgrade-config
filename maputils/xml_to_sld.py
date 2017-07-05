@@ -328,6 +328,9 @@ class xml_to_sld(object):
                 rule = ET.SubElement(sld, "Rule")
                 if 'name' in class_.attrib and not class_.attrib['name'] == '':
                     rule.set("name",class_.attrib['name'])
+                
+                name = ET.SubElement(rule, "Name", nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"})
+                name.text = "."
                     #print "name "+class_.attrib['name']
                 #filter
                 classitem = layer.find(QName(ns, 'classItem'))
