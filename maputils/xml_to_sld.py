@@ -55,6 +55,8 @@ class xml_to_sld(object):
             self.set_color(stroke_color, color)
         
         width = style.find('{http://www.mapserver.org/mapserver}outlineWidth')
+        if width is None:
+            width = style.find('{http://www.mapserver.org/mapserver}width')
         if width is not None:
             stroke_width = ET.SubElement(stroke, "CssParameter", name="stroke-width")
             stroke_width.text = width.text
@@ -278,16 +280,16 @@ class xml_to_sld(object):
             filterEl = ET.SubElement(rule,"ElseFilter")
             return
         else:
-            filterEl = ET.SubElement(rule, "{http://www.opengis.net/ogc}Filter")
+            filterEl = ET.SubElement(rule, "Filter")
         if exprText.startswith('/'):
-            f = ET.SubElement(filterEl,"{http://www.opengis.net/ogc}PropertyIsLike")
+            f = ET.SubElement(filterEl,"PropertyIsLike")
             exprText = exprText.replace('/','%')
         else: 
-            f = ET.SubElement(filterEl,"{http://www.opengis.net/ogc}PropertyNameIsEqualTo")
+            f = ET.SubElement(filterEl,"PropertyNameIsEqualTo")
             
-        prop = ET.SubElement(f, "{http://www.opengis.net/ogc}PropertyName" )
+        prop = ET.SubElement(f, "PropertyName" )
         prop.text = classitem.text
-        literal = ET.SubElement(f,"{http://www.opengis.net/ogc}Literal")
+        literal = ET.SubElement(f,"Literal")
         literal.text = exprText
         
     def __init__(self, input_file, root=None):
@@ -323,13 +325,15 @@ class xml_to_sld(object):
             layer_name = layer.attrib['name']
             class_item = layer.find('classItem')
             #print str(layer_type) +" "+str(layer_name)
-            sld = ET.Element("FeatureTypeStyle",nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"}) 
+            sld = ET.Element("FeatureTypeStyle")
+            #,nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"} 
             for class_ in layer.iterfind(QName(ns, 'Class')):
                 rule = ET.SubElement(sld, "Rule")
                 if 'name' in class_.attrib and not class_.attrib['name'] == '':
                     rule.set("name",class_.attrib['name'])
                 
-                name = ET.SubElement(rule, "Name", nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"})
+                name = ET.SubElement(rule, "Name")
+                #, nsmap={None:"http://www.opengis.net/sld","ogc":"http://www.opengis.net/ogc"}
                 name.text = "."
                     #print "name "+class_.attrib['name']
                 #filter
@@ -360,15 +364,15 @@ class xml_to_sld(object):
                         maxs = ET.SubElement(rule,"MaxScaleDenominator")
                         maxs.text = maxscale.text
                         
-                    if layer_type == 'LINE':
+                    if layer_type.upper() == 'LINE':
                         symb = ET.SubElement(rule, "LineSymbolizer")
                         self.getStroke(style, symb, isLine=True)
                             
-                    elif layer_type == 'POLYGON':
+                    elif layer_type.upper() == 'POLYGON':
                         symb = ET.SubElement(rule, "PolygonSymbolizer")
                         self.getFill(style, symb)
                         self.getStroke(style, symb)
-                    elif layer_type == 'POINT':
+                    elif layer_type.upper() == 'POINT':
                         symb = ET.SubElement(rule, "PointSymbolizer")
                         self.getGraphic(style,symb)
                     else:
