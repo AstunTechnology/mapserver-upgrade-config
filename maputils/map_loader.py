@@ -3,10 +3,13 @@ Created on 28 Jun 2017
 
 @author: ian
 '''
+import sys
 import mappyfile
 import json
-mapfile = open( "/home/ian/Downloads/MVDC_layers_MyMapsEveryone.map", "r" )
+mapfile = open( sys.argv[1], "r" )
 mf = mappyfile.load( mapfile )
 
-with open("./docs/examples/sample.json", "w") as f:
-    json.dump(mf, f, indent=4)
+if len(sys.argv)==3:
+    sys.stdout = open(sys.argv[2], 'w')
+
+json.dump(mf, sys.stdout, indent=4)

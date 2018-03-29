@@ -1,9 +1,11 @@
 #!/usr/bin/python
-
+from __future__ import print_function
 import sys
 import argparse
+import sys
 
-
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 # open the MapFile
 class fix_mapfile:
@@ -28,7 +30,7 @@ class fix_mapfile:
             sys.stdout = open(self.output, 'w')
             
         self.openings = ['class', 'validation', 'map', 'layer', 'outputformat', 'metadata', 'legend', 'label', 'querylayer', 'scalebar', 'web', 'style', 'querymap',
-                'projection', 'symbol']
+                'projection']
         
         
 
@@ -64,7 +66,7 @@ class fix_mapfile:
                         lines = []
                         pattern_line = []
                     else:
-                        print self.generate_indent(indent) + line.strip();
+                        print (self.generate_indent(indent) + line.strip())
                     indent += 1
                     in_count+= 1
                     line = '' 
@@ -75,31 +77,32 @@ class fix_mapfile:
                     if(in_meta):
                         in_meta = False
                         if len(lines) > 0:
-                            print self.generate_indent(indent) + "METADATA"
+                            print ( self.generate_indent(indent) + "METADATA")
                             for l in lines:
-                                print self.generate_indent(indent + 1) + l
-                            print self.generate_indent(indent) + "END"
+                                print ( self.generate_indent(indent + 1) + l)
+                            print ( self.generate_indent(indent) + "END")
                         if pattern_line:
-                            print self.generate_indent(indent) + "VALIDATION"
+                            print ( self.generate_indent(indent) + "VALIDATION")
                             indent += 1
                             for p in pattern_line:
-                                print self.generate_indent(indent) + p
+                                print ( self.generate_indent(indent) + p)
                             indent -= 1
-                            print self.generate_indent(indent) + "END"
+                            print ( self.generate_indent(indent) + "END")
                         elif in_layer:
-                            print self.generate_indent(indent) + "VALIDATION"
+                            print ( self.generate_indent(indent) + "VALIDATION")
                             indent += 1
-                            print self.generate_indent(indent) + '"qstring" "."'
+                            print ( self.generate_indent(indent) + '"qstring" "."')
                             indent -= 1
-                            print self.generate_indent(indent) + "END"
+                            print ( self.generate_indent(indent) + "END")
                         line = ''  # dispose of spare END
                         pattern_line = []
                     if in_layer and in_count == 0 and not any_meta:
-                        print self.generate_indent(indent) + "VALIDATION"
+                        print ( self.generate_indent(indent) + "VALIDATION")
                         indent += 1
-                        print self.generate_indent(indent) + '"qstring_validation_pattern" "."'
+                        print ( self.generate_indent(indent) +
+                        '"qstring_validation_pattern" "."')
                         indent -= 1
-                        print self.generate_indent(indent) + "END"
+                        print ( self.generate_indent(indent) + "END")
                     in_count-=1
                     
                 if 'validation_pattern' in sline:
@@ -112,7 +115,18 @@ class fix_mapfile:
                     line = ''  # delete the line from the input
                         
                 if (line.rstrip() != '' and not in_meta):
-                    print self.generate_indent(indent) + line.strip();
+                    #eprint("printing",line.strip())
+                    if('symbol' in sline):
+                        parts = line.split()
+                        oline = self.generate_indent(indent) + parts[0]
+                        for p in parts[1:]:
+                            if not '"' in p and not "'" in p:
+                                oline+=' "'+p+'"'
+                            else:
+                                oline += ' '+p
+                        print(oline)
+                    else:
+                        print (self.generate_indent(indent) + line.strip())
                     
                 if(line.rstrip() != '' and in_meta):
                     lines.append(line.strip())
@@ -132,7 +146,7 @@ def main():
     use_tabs = False
     if args.tabs:
         use_tabs = True
-        print use_tabs
+        print ( use_tabs)
     # copy to backup and run fix
     # shutil.copy(infile, backup)
     fixer = fix_mapfile(args.inputfile, tabs=use_tabs, output_file=args.outputfile, width=args.width)
