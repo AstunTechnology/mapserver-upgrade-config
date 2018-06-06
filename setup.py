@@ -11,7 +11,8 @@ setup(name='mapfile-utils',
           'console_scripts':[
               'load-map=maputils.map_loader:main',
               'fix-map=maputils.fix_mapfile:main',
-              'map-to-xml=maputils.map_to_xml:main'
+              'map-to-xml=maputils.map_to_xml:main',
+              'xml-to-sld=maputils.xml_to_sld:main'
               ]
           },
       packages=['maputils'],
