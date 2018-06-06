@@ -304,7 +304,7 @@ class map_to_xml(object):
         return new_root
 
     def __init__(self, input_file, output_file="", width=2, tabs=False):
-        self.input = input_file
+        self.input = open(input_file,'r')
         self.output = output_file
         self.width = width
         self.tabs = tabs
@@ -317,7 +317,7 @@ class map_to_xml(object):
         #map_ = parser.parse_file(input_file)
     
         
-        mapp = mappyfile.utils.load(input_file)
+        mapp = mappyfile.utils.load(self.input)
         for mapkey in mapp.keys():
             if "include" == mapkey:
                 # import the file?
@@ -367,6 +367,8 @@ def main():
     args = parser.parse_args()
     
     
+    print "Processing {}".format(args.inputfile)
+
     mapper = map_to_xml(args.inputfile,  output_file=args.outputfile)
     mapper.print_map()
     # for el in mapper.map_root:
