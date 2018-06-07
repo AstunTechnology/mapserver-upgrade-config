@@ -13,6 +13,8 @@ import mappyfile
 # import dicttoxml
 # from xml.dom.minidom import parseString
 from lxml import etree
+from lxml.etree import CDATA
+
 import plyplus
 from xml.sax.saxutils import escape
 from operator import attrgetter
@@ -219,6 +221,9 @@ class map_to_xml(object):
                         item = etree.SubElement(validation, "item", name=k[0].replace("'", "").replace("\"", ""))
                         item.text = k[1].replace("'", "").replace("\"", "")
                     
+                elif "data" == key:
+                    data = etree.SubElement(layer,"Data")
+                    data.text = CDATA(l["data"])
                 else:
                     self.makeSubElement(layer, l, key)
             layer = self.sortChildren(layer, layer)
