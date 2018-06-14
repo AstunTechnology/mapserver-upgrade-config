@@ -31,7 +31,6 @@ class XQName(QName):
 
     
 class xml_to_sld(object):
-    
 
     def set_color(self, target, color):
         colors = []
@@ -42,7 +41,6 @@ class xml_to_sld(object):
 
 
     def getStroke(self, style, symbol, isLine=False):
-        #ET.dump(style) 
         color = style.find('{http://www.mapserver.org/mapserver}outlineColor')
         if isLine:
             color = style.find('{http://www.mapserver.org/mapserver}color')
@@ -261,13 +259,13 @@ class xml_to_sld(object):
                 
             
         #halo
-        outCol = label.find("{http://www.mapserver.org/mapserver}outlineColor")
+        outCol = label.find('{http://www.mapserver.org/mapserver}outlineColor')
         if outCol is not None:
             halo = ET.SubElement(sText, "Halo")
             fill = ET.SubElement(halo, "Fill")
             col = ET.SubElement(fill, "CssParameter", name="fill")
             self.set_color(col, outCol)
-        ccol = label.find("{http://www.mapserver.org/mapserver}color")
+        ccol = label.find('{http://www.mapserver.org/mapserver}color')
         if ccol is not None:
             fill = ET.SubElement(sText, "Fill")
             col = ET.SubElement(fill, "CssParameter", name="fill")
@@ -333,7 +331,8 @@ class xml_to_sld(object):
                 if 'name' in class_.attrib and not class_.attrib['name'] == '':
                     rule.set("name",class_.attrib['name'])
                     name.text = class_.attrib['name']
-                #name.text = "."
+                if name.text == None:
+                    name.text = "."
                 #filter
                 classitem = layer.find(QName(ns, 'classItem'))
                 if classitem is not None:
