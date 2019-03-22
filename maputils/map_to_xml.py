@@ -3,8 +3,6 @@ Created on 30 Jan 2017
 
 @author: ian
 '''
-
-from functools import reduce
 import argparse
 import sys
 import io
@@ -228,7 +226,7 @@ class map_to_xml(object):
 
                 elif "data" == key:
                     data = etree.SubElement(layer, "Data")
-                    data.text = CDATA(l["data"])
+                    data.text = CDATA(l["data"][0])
                 else:
                     self.makeSubElement(layer, l, key)
             layer = self.sortChildren(layer, layer)
