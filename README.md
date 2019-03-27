@@ -4,7 +4,7 @@
 
 Requires python 2.7 
 
-
+sudo python setup.py install
     
 ## Usage
 
@@ -25,3 +25,6 @@ convert a mapfile.xml to a dictionary of SLD elements indexed by layer name.
     load-map file.map
     
 converts a mapfile to JSON, really only useful as a test of correctness.
+
+# Notes
+Any includes should be present in directory script is being run from. Can be empty files so touch.
