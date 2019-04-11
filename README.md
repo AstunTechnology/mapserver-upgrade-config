@@ -4,6 +4,11 @@
 
 Requires python 2.7 
 
+Fetch latest egg file from dist directory and run (e.g.) `easy_install mapfile_utils-1.0.2-py2.7.egg`
+
+
+## Development
+
 sudo python setup.py install
     
 ## Usage
