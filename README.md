@@ -4,7 +4,7 @@
 
 Requires python 2.7 
 
-Fetch latest egg file from dist directory and run (e.g.) `easy_install mapfile_utils-1.0.2-py2.7.egg`
+Fetch latest egg file from dist directory and run (e.g.) `easy_install mapfile_utils-1.1.0-py2.7.egg`
 
 
 ## Development
@@ -32,4 +32,4 @@ convert a mapfile.xml to a dictionary of SLD elements indexed by layer name.
 converts a mapfile to JSON, really only useful as a test of correctness.
 
 # Notes
-Any includes should be present in directory script is being run from. Can be empty files so touch.
+Any includes should be present in directory script is being run from. Can be empty files so touch will do.

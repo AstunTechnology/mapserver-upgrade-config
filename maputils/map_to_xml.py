@@ -6,8 +6,10 @@ Created on 30 Jan 2017
 import argparse
 import sys
 import io
+import re
+import codecs
 import mappyfile
-
+from functools import reduce  # python 3
 # import dicttoxml
 # from xml.dom.minidom import parseString
 from lxml import etree
@@ -321,6 +323,9 @@ class map_to_xml(object):
         self.tabs = tabs
         if self.output:
             sys.stdout = io.open(self.output, 'w', encoding="utf-8")
+        else:
+            # make sure that std out is utf-8 compliant
+            sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
         # parser = mappyfile.parser.Parser()
         root = etree.Element("Map",
@@ -329,7 +334,9 @@ class map_to_xml(object):
                              name=input_file, version="5.6")
         # map_ = parser.parse_file(input_file)
 
+        self.fix_nulls()
         mapp = mappyfile.utils.load(self.input)
+        self.input.close()
         for mapkey in mapp.keys():
             if "include" == mapkey:
                 # import the file?
@@ -369,6 +376,22 @@ class map_to_xml(object):
 
     def print_map(self):
         print(etree.tostring(self.map_root, pretty_print=True))
+
+    def fix_nulls(self):
+        # convert "is not null" to " != null" and "is null" to " = NULL"
+        with io.open('new.txt', 'w', encoding="utf-8") as g:
+            for line in self.input:
+                # FILTER ("roadno" not like 'C%' and "roadno"
+                # becomes (not("roadno" like 'C%') and ...
+                line = re.sub(r"([\w\"\'_%]+) not like ([\w\"\'_%]+)",
+                              r"NOT \1 LIKE \2", line)
+
+                line = line.replace("\\", "/")
+                line = line.replace(" is not null", " != null")
+                line = line.replace(" is null", " = null")
+                g.write(line)
+
+        self.input = io.open('new.txt', 'r', encoding="utf-8")
 
 
 def main():
