@@ -316,27 +316,50 @@ class map_to_xml(object):
 
         return new_root
 
-    def __init__(self, input_file, output_file="", width=2, tabs=False):
-        self.input = io.open(input_file, 'r', encoding="utf-8")
-        self.output = output_file
-        self.width = width
-        self.tabs = tabs
-        if self.output:
-            sys.stdout = io.open(self.output, 'w', encoding="utf-8")
+    def __init__(self, input_file=None, input_string=None, output_file="",
+                 width=2, tabs=False):
+        if not input_file and not input_string:
+            return
+        if input_file:
+            self.input = io.open(input_file, 'r', encoding="utf-8")
+            self.output = output_file
+            self.width = width
+            self.tabs = tabs
+            if self.output:
+                sys.stdout = io.open(self.output, 'w', encoding="utf-8")
+            else:
+                # make sure that std out is utf-8 compliant
+                sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+
+            # parser = mappyfile.parser.Parser()
+            self.root = etree.Element("Map",
+                                      nsmap={
+                                         None:
+                                         "http://www.mapserver.org/mapserver"},
+                                      name=input_file, version="5.6")
+            # map_ = parser.parse_file(input_file)
+
+            self.fix_nulls()
+            mapp = mappyfile.utils.load(self.input)
+            self.input.close()
         else:
-            # make sure that std out is utf-8 compliant
-            sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+            mapp = mappyfile.utils.loads(input_string)
+            self.root = etree.Element("Map",
+                                      nsmap={
+                                         None:
+                                         "http://www.mapserver.org/mapserver"},
+                                      version="5.6")
 
-        # parser = mappyfile.parser.Parser()
-        root = etree.Element("Map",
-                             nsmap={
-                                 None: "http://www.mapserver.org/mapserver"},
-                             name=input_file, version="5.6")
-        # map_ = parser.parse_file(input_file)
+        self.parse(mapp)
 
-        self.fix_nulls()
-        mapp = mappyfile.utils.load(self.input)
-        self.input.close()
+    def getroot(self):
+        return self.root
+
+    def setroot(self, root):
+        self.root = root
+
+    def parse(self, mapp):
+        root = self.getroot()
         for mapkey in mapp.keys():
             if "include" == mapkey:
                 # import the file?
@@ -371,7 +394,8 @@ class map_to_xml(object):
         root = self.sortChildren(root,
                                  etree.Element("Map",
                                                nsmap={None: ms_ns},
-                                               name=input_file, version="5.6"))
+                                               # name=input_file,
+                                               version="5.6"))
         self.map_root = root
 
     def print_map(self):
