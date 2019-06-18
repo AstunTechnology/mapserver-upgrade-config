@@ -317,7 +317,7 @@ class map_to_xml(object):
         return new_root
 
     def __init__(self, input_file=None, input_string=None, output_file="",
-                 width=2, tabs=False):
+                 width=2, tabs=False, expand_includes=True):
         if not input_file and not input_string:
             return
         if input_file:
@@ -340,10 +340,12 @@ class map_to_xml(object):
             # map_ = parser.parse_file(input_file)
 
             self.fix_nulls()
-            mapp = mappyfile.utils.load(self.input)
+            mapp = mappyfile.utils.load(self.input,
+                                        expand_includes=expand_includes)
             self.input.close()
         else:
-            mapp = mappyfile.utils.loads(input_string)
+            mapp = mappyfile.utils.loads(input_string,
+                                         expand_includes=expand_includes)
             self.root = etree.Element("Map",
                                       nsmap={
                                          None:

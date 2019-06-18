@@ -156,8 +156,8 @@ class xml_to_sld(object):
                 mark = ET.SubElement(graphic, "Mark")
                 wkn = ET.SubElement(mark, "WellKnownName")
                 wkn.text = symbol.text
-                self.getFill(symbol, mark)
-                self.getStroke(symbol, mark)
+                self.getFill(style, mark)
+                self.getStroke(style, mark)
 
         s_size = style.find('{http://www.mapserver.org/mapserver}size')
         if s_size is not None:
