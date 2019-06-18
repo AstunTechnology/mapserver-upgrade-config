@@ -46,6 +46,11 @@ class xml_to_sld(object):
             stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")
             self.set_color(stroke_color, color)
 
+        opacity = style.find('{http://www.mapserver.org/mapserver}opacity')
+        if opacity is not None:
+            fill_opacity = ET.SubElement(stroke, "CssParameter",
+                                         name="stroke-opacity")
+            fill_opacity.text = str(float(opacity.text)/100.0)
         width = style.find('{http://www.mapserver.org/mapserver}outlineWidth')
         if width is None:
             width = style.find('{http://www.mapserver.org/mapserver}width')

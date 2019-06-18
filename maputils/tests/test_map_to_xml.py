@@ -22,6 +22,33 @@ class Test_update_mapsource:
         # print(etree.tostring(root, pretty_print=True))
         assert(root is not None)
 
+    def test_opacity(self):
+        instr = """MAP
+        LAYER
+        NAME "test"
+        TYPE LINE
+        CLASS
+            NAME "class 1"
+                EXPRESSION "1"
+                STYLE
+                COLOR 222 100 199
+                OPACITY 50
+            END
+            END
+            END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            print("layer", layer)
+            ET.dump(sldStore.getLayer(layer))
+        assert(layer is not None)
+        good = False
+        for css in sldStore.getLayer(layer).iter("CssParameter"):
+            good = good or css.attrib['name'] == 'stroke-opacity'
+        assert(good)
+
     def test_marks(self):
         instr = """MAP
         LAYER
@@ -46,17 +73,10 @@ class Test_update_mapsource:
         END"""
         obs = map_to_xml.map_to_xml(input_string=instr)
         root = obs.map_root
-#        ns = root.nsmap[None]
-#        if ns is None:
-#            ns = "http://www.mapserver.org/mapserver"
-#        for x in root.getiterator():
-#            if '{' not in x.tag:
-#                x.tag = "{"+ns+"}"+x.tag
-
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
             print("layer", layer)
             ET.dump(sldStore.getLayer(layer))
-        assert(layer is not None)
-        assert(layer.find("Fill") is not None)
-        assert(layer.find("Stroke") is not None)
+        assert(sldStore.getLayer(layer) is not None)
+        assert(sldStore.getLayer(layer).find("Fill") != -1)
+        assert(sldStore.getLayer(layer).find("Stroke") != -1)
