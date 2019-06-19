@@ -34,7 +34,11 @@ class xml_to_sld(object):
         colors.append(color.get('blue'))
         target.text = "#" + "".join("{:02X}".format(int(a)) for a in colors)
 
-    def getStroke(self, style, symbol, isLine=False):
+    def getStroke(self, style, symbol, isLine=False, in_graphic=False):
+        if not in_graphic:
+            self.getGraphic(style, symbol, in_graphic=True)
+            if symbol.find("./Graphic") is not None:
+                return
         color = style.find('{http://www.mapserver.org/mapserver}outlineColor')
         if isLine:
             color = style.find('{http://www.mapserver.org/mapserver}color')
@@ -82,7 +86,11 @@ class xml_to_sld(object):
             stroke_offset.text = line_gap.text
         # ET.dump(stroke)
 
-    def getFill(self, style, symb):
+    def getFill(self, style, symb, in_graphic=False):
+        if not in_graphic:
+            self.getGraphic(style, symb, True)
+            if symb.find("./Graphic") is not None:
+                return
         color = style.find('{http://www.mapserver.org/mapserver}color')
         if color is None:
             return
@@ -136,7 +144,9 @@ class xml_to_sld(object):
 
         return True
 
-    def getGraphic(self, style, symb):
+    def getGraphic(self, style, symb, in_graphic=False):
+        if symb.find("./Graphic") is not None:
+            return
         symbol = style.find('{http://www.mapserver.org/mapserver}symbol')
         if symbol is None:
             return
@@ -156,13 +166,20 @@ class xml_to_sld(object):
                                       s.find(
                                           '{http://www.mapserver' +
                                           '.org/mapserver}image').text)
+                else:
+                    # then it is a WKname
+                    mark = ET.SubElement(graphic, "Mark")
+                    wkn = ET.SubElement(mark, "WellKnownName")
+                    wkn.text = symbol.text
+                    self.getFill(style, mark, in_graphic=True)
+                    self.getStroke(style, mark, in_graphic=True)
             else:
                 # then it is a WKname
                 mark = ET.SubElement(graphic, "Mark")
                 wkn = ET.SubElement(mark, "WellKnownName")
                 wkn.text = symbol.text
-                self.getFill(style, mark)
-                self.getStroke(style, mark)
+                self.getFill(style, mark, in_graphic=True)
+                self.getStroke(style, mark, in_graphic=True)
 
         s_size = style.find('{http://www.mapserver.org/mapserver}size')
         if s_size is not None:
@@ -313,7 +330,6 @@ class xml_to_sld(object):
             self.symbols[symbol.attrib['name']] = symbol
 
         layerRef = QName(ns, 'Layer')
-        # print "LayerRef="+layerRef.text
         for layer in root.iterfind(layerRef):
             layer_type = layer.attrib['type']
             layer_name = layer.attrib['name']

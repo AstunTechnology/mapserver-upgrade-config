@@ -1,0 +1,22 @@
+MAP
+   INCLUDE './maputils/tests/mapfiles/symbols.inc'
+   LAYER
+       NAME "test"
+       TYPE POLYGON
+       CLASS
+        NAME ""
+        STYLE
+          COLOR 255 153 204
+          OUTLINECOLOR 0 102 0
+          WIDTH 1
+        END
+        STYLE
+          COLOR 0 102 0
+          GAP 1
+          SIZE 6
+          SYMBOL "/line"
+          WIDTH 1
+        END
+      END
+   END
+END
