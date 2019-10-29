@@ -15,8 +15,8 @@ from functools import reduce  # python 3
 from lxml import etree
 from lxml.etree import CDATA
 
-import plyplus
-from xml.sax.saxutils import escape
+# import plyplus
+# from xml.sax.saxutils import escape
 from operator import attrgetter
 import operator
 
@@ -122,9 +122,9 @@ class map_to_xml(object):
         el = etree.SubElement(root, keyx)
 
         element = elements[key]
-        if isinstance(element, plyplus.common.TokValue):
-            el.text = escape(element).replace("'", "").replace("\"", "")
-        elif key.find("color") > -1:
+        #  if isinstance(element, plyplus.common.TokValue):
+        #      el.text = escape(element).replace("'", "").replace('"', "")
+        if key.find("color") > -1:
             el.set("red", str(element[0]))
             el.set("green", str(element[1]))
             el.set("blue", str(element[2]))
@@ -329,7 +329,8 @@ class map_to_xml(object):
                 sys.stdout = io.open(self.output, 'w', encoding="utf-8")
             else:
                 # make sure that std out is utf-8 compliant
-                sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+                # sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+                pass
 
             # parser = mappyfile.parser.Parser()
             self.root = etree.Element("Map",

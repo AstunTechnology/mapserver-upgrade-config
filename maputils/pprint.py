@@ -1,5 +1,7 @@
 import argparse
 import mappyfile
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -8,11 +10,10 @@ def main():
 
     args = parser.parse_args()
 
-    print "input "+args.inputfile
-    print "output "+args.outputfile
+    print("input "+args.inputfile)
+    print("output "+args.outputfile)
 
-    ifile = open(args.inputfile,'r')
-    #ofile = open(args.outputfile, 'w')
+    ifile = open(args.inputfile, 'r')
     mf = mappyfile.load(ifile, expand_includes=False)
 
     mappyfile.write(mf, args.outputfile)
@@ -20,4 +21,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                      

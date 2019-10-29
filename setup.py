@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='mapfile-utils',
-      version='1.1.1',
+      version='2.0.0',
       description='Useful scripts for mapfile manipulation',
       url='',
       author='Ian Turton',
@@ -16,7 +16,8 @@ setup(name='mapfile-utils',
               ]
           },
       packages=['maputils'],
-      install_requires=['mappyfile', 'lxml', 'plyplus'],
-      dependency_links=['http://download.astuntechnology.com/public/mappyfile-0.7.1a0-py2.7.egg',
-                    'https://github.com/AstunTechnology/mapserver-upgrade-config/raw/master/dist/maputils-0.2.1-py2.7.egg'],
+      install_requires=['mappyfile>0.8.3', 'lxml'],
+      dependency_links=[
+          'http://download.astuntechnology.com/public/mappyfile-0.8.4a0-py3.6.egg'
+      ],
       zip_safe=False)
