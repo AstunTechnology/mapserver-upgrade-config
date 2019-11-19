@@ -18,6 +18,6 @@ setup(name='mapfile-utils',
       packages=['maputils'],
       install_requires=['mappyfile>0.8.3', 'lxml'],
       dependency_links=[
-          'http://download.astuntechnology.com/public/mappyfile-0.8.4a0-py3.6.egg'
+          'http://download.astuntechnology.com/public/mappyfile-0.8.4a0-py3.7.egg'
       ],
       zip_safe=False)
