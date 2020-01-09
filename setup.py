@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='mapfile-utils',
-      version='2.0.1',
+      version='2.0.2',
       description='Useful scripts for mapfile manipulation',
       url='',
       author='Ian Turton',
@@ -18,6 +18,6 @@ setup(name='mapfile-utils',
       packages=['maputils'],
       install_requires=['mappyfile>0.8.3', 'lxml'],
       dependency_links=[
-          'http://download.astuntechnology.com/public/mappyfile-0.8.4a0-py3.7.egg'
+          'http://download.astuntechnology.com/public/mappyfile-0.8.4b0-py3.6.egg'
       ],
       zip_safe=False)

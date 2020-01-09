@@ -7,7 +7,6 @@ import argparse
 import sys
 import io
 import re
-import os
 import mappyfile
 from functools import reduce  # python 3
 # import dicttoxml
@@ -406,20 +405,19 @@ class map_to_xml(object):
 
     def fix_nulls(self):
         # convert "is not null" to " != null" and "is null" to " = NULL"
-        with io.open('new.txt', 'w', encoding="utf-8") as g:
-            for line in self.input:
-                # FILTER ("roadno" not like 'C%' and "roadno"
-                # becomes (not("roadno" like 'C%') and ...
-                line = re.sub(r"([\w\"\'_%]+) not like ([\w\"\'_%]+)",
-                              r"NOT \1 LIKE \2", line)
+        buffer = ""
+        for line in self.input:
+            # FILTER ("roadno" not like 'C%' and "roadno"
+            # becomes (not("roadno" like 'C%') and ...
+            line = re.sub(r"([\w\"\'_%]+) not like ([\w\"\'_%]+)",
+                          r"NOT \1 LIKE \2", line)
 
-                line = line.replace("\\", "/")
-                line = line.replace(" is not null", " != null")
-                line = line.replace(" is null", " = null")
-                g.write(line)
+            line = line.replace("\\", "/")
+            line = line.replace(" is not null", " != null")
+            line = line.replace(" is null", " = null")
+            buffer += line
 
-        self.input = io.open('new.txt', 'r', encoding="utf-8")
-        os.remove("new.txt")
+        self.input = io.StringIO(buffer)
 
 
 def main():
