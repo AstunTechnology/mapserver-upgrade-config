@@ -7,7 +7,7 @@ import argparse
 import sys
 import io
 import re
-import codecs
+import os
 import mappyfile
 from functools import reduce  # python 3
 # import dicttoxml
@@ -419,6 +419,7 @@ class map_to_xml(object):
                 g.write(line)
 
         self.input = io.open('new.txt', 'r', encoding="utf-8")
+        os.remove("new.txt")
 
 
 def main():
