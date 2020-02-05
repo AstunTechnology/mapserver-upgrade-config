@@ -1,0 +1,1542 @@
+<Map xmlns="http://www.mapserver.org/mapserver" name="/home/ian/code/mapserver-upgrade-config/mapfiles/edc_base.map" version="5.6">
+  <Config>
+    <item name="MS_ERRORFILE">"D:\mapserver\tmp\debug_edenmaps.log"</item>
+    <item name="PROJ_LIB">"D:/MapServer/shared/proj/nad"</item>
+  </Config>
+  <debug>1</debug>
+  <extent>318450 484521 400800 562375</extent>
+  <fontSet>D:/mapserver/shared/fonts/fonts.list</fontSet>
+  <imageColor red="255" green="255" blue="255"/>
+  <imageType>AGG_Q</imageType>
+  <Layer name="TouristInformation" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="192"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>tic</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.tic using unique ogc_fid using srid=27700</data>
+    <labelItem>location</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleGreystoke" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.greystoke using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleRoutes" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="200" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="0" green="245" blue="0"/>
+        <width>2</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.cycleroutes using unique ogc_fid using srid=27700</data>
+    <labelItem>routename</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Opticians" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>optician</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.all where service=opticians) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleBoredale" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <opacity>100</opacity>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.boredale using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleOrton" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.orton using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleEdenRivers" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.edenrivers using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="PlayAreas" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="255" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="255" green="0" blue="0"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.playareas using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleEdenValley2" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.edenvalley2 using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleEdenValleyPenrithNE" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.edenvalleypenrithne using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleEdgeLakeland" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.edgelakeland using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="GrittingRoutesSecond" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="0" green="0" blue="250"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.grittingroutessecond using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="MinorInjuriesUnits" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>hospitals2</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.minorinjuriesunits) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleGtMellFell" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.gtmellfell using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="ModGov_Councillors" status="OFF" type="POLYGON">
+    <Class name="">
+      <Style>
+        <angle>135</angle>
+        <color red="64" green="0" blue="64"/>
+        <size>10</size>
+        <symbol>hatch</symbol>
+      </Style>
+      <Style>
+        <outlineColor red="0" green="64" blue="128"/>
+        <width>2</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select *, full_html As full_html_raw from edc_modgov.moderngov_spatial) as foo using unique ogc_fid using srid=27700</data>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <toleranceUnits>PIXELS</toleranceUnits>
+  </Layer>
+  <Layer name="CycleLowther" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.lowther using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CouncilOffices" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>25</size>
+        <symbol>house</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from edc_admin.counciloffices) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CemeteryPaths" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="128" green="0" blue="128"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="0" green="0" blue="192"/>
+        <width>1</width>
+      </Style>
+      <Style>
+        <color red="50" green="50" blue="255"/>
+        <opacity>30</opacity>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_community.cemeteries using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleLyvennet" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.lyvennet using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="PollingStations" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>25</size>
+        <symbol>polling</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from edc_community.pollingstations) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>pollingstation</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="TaxiRanks" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>taxirank</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.taxiranks using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleMallerstang" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.mallerstang using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="DistrictBoundary" status="OFF" type="POLYGON">
+    <Class>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="0" green="128" blue="0"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from shared_boundary.eden_districtboundary using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Doctors" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>doctors</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.all where service=gppractices) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Wards" status="OFF" type="POLYGON">
+    <Class name="ward">
+      <Label type="TRUETYPE">
+        <color red="128" green="0" blue="128"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="128" green="0" blue="128"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from shared_boundary.eden_wards using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleOldCoachRoad" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.oldcoachroad using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Dentists" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>dentists</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.all where service=dentists) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Parishes" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="255" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="255" green="0" blue="0"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_admin.edenparishes using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="AsthmaClinics" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>clinics</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.asthmaclinics) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleVillagesViaducts" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.villagesviaducts using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CCTV" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="20" green="20" blue="20"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>25</size>
+        <symbol>speedcamera</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_admin.cctv using unique ogc_fid using srid=27700</data>
+    <labelItem>street_name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleUllswater" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.ullswater using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="DPPO" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>10</size>
+      </Label>
+      <Style>
+        <color red="157" green="219" blue="57"/>
+        <opacity>50</opacity>
+      </Style>
+      <Style>
+        <outlineColor red="0" green="0" blue="0"/>
+        <width>2</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.dppo using unique ogc_fid using srid=27700</data>
+    <labelItem>dppo_name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="SchoolInfant" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="103" green="204" blue="1"/>
+        <font>trebuc</font>
+        <offset x="0" y="15"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>infant</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from edc_education.infant) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>school</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="SchoolPrimary" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="103" green="204" blue="1"/>
+        <font>trebuc</font>
+        <offset x="0" y="15"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>primary</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_edubase.all where (phase_of_education_name = Primary or phase_of_education_name = Middle deemed Primary) and establishment_status = Open) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>establishment_name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Toilets" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>WC</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.toilets using unique ogc_fid using srid=27700</data>
+    <labelItem>location</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Libraries" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="128" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>libraries2</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.libraries using unique ogc_fid using srid=27700</data>
+    <labelItem>library_name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="SchoolSecondary" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="102" blue="51"/>
+        <font>trebuc</font>
+        <offset x="0" y="15"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>secondary</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_edubase.all where (phase_of_education_name = Secondary or phase_of_education_name = Middle deemed Secondary) and establishment_status = Open) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>establishment_name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="GrittingRoutesTrunk" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="250" green="105" blue="180"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.grittingroutestrunk using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="PlannApps" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>placesofworship2</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_planning.currentplanning using unique ogc_fid using srid=27700</data>
+    <labelItem>reference</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CycleMoorDivock" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="138" green="43" blue="226"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="138" green="43" blue="226"/>
+        <width>3</width>
+      </Style>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="100" green="100" blue="100"/>
+        <width>5</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.moordivock using unique ogc_fid using srid=27700</data>
+    <labelItem>cycleroute</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="FloodDefences" type="RASTER" status="OFF">
+    <Class/>
+    <connection>http://environment.data.gov.uk/ds/wms?SERVICE=WMS&amp;amp;INTERFACE=ENVIRONMENT--87a0df4f-d465-11e4-bee4-f0def148f590&amp;amp;</connection>
+    <connectionType>WMS</connectionType>
+    <group>eainspire2011-wms-nat_defences_inspire</group>
+    <Metadata>
+      <item name="wms_srs">EPSG:27700</item>
+      <item name="wms_name">eainspire2011-wms-nat_defences_inspire</item>
+      <item name="wms_server_version">1.1.1</item>
+      <item name="wms_format">image/png</item>
+    </Metadata>
+  </Layer>
+  <Layer name="PlanningHistory" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <color red="214" green="0" blue="163"/>
+        <opacity>30</opacity>
+      </Style>
+      <Style>
+        <outlineColor red="214" green="0" blue="163"/>
+        <width>2</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_planning.planninghistory using unique ogc_fid using srid=27700</data>
+    <labelItem>altref</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="PlanningHistory1978-2004" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <outlineColor red="82" green="61" blue="0"/>
+        <width>2</width>
+      </Style>
+      <Style>
+        <color red="204" green="153" blue="0"/>
+        <opacity>30</opacity>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_planning.planninghistory1978_2004 using unique ogc_fid using srid=27700</data>
+    <labelItem>altref</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="BCApps" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>placesofworship</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (SELECT *, http://www.eden.gov.uk/planning-and-building/building-control/ AS base_url FROM edc_planning.bcapps) AS foo using unique ogc_fid using srid=27700</data>
+    <labelItem>reference</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Allotments" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>10</size>
+      </Label>
+      <Style>
+        <color red="181" green="121" blue="82"/>
+        <opacity>100</opacity>
+      </Style>
+      <Style>
+        <outlineColor red="181" green="121" blue="82"/>
+        <width>2</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.allotments using unique ogc_fid using srid=27700</data>
+    <labelItem>address</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="ListBuilding" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>historic</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_planning.listedbuildings using unique ogc_fid using srid=27700</data>
+    <labelItem>property</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="GrittingRoutesFirst" status="OFF" type="LINE">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="20"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <antialias>TRUE</antialias>
+        <color red="250" green="0" blue="0"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.grittingroutesfirst using unique ogc_fid using srid=27700</data>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="ConsAreas" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="230" blue="230"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <outlineColor red="0" green="230" blue="230"/>
+        <width>2</width>
+      </Style>
+      <Style>
+        <color red="0" green="220" blue="220"/>
+        <opacity>45</opacity>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.conservationareas using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Hospitals" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <symbol>hospitals</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from (select * from shared_nhschoices.all where service=hospitals) as foo using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="DogControlOrders" status="OFF" type="POLYGON">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="192" green="0" blue="0"/>
+        <font>trebuc</font>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <outlineColor red="192" green="0" blue="0"/>
+        <width>2</width>
+      </Style>
+      <Style>
+        <color red="192" green="0" blue="0"/>
+        <opacity>50</opacity>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.dogcontrolorders using unique ogc_fid using srid=27700</data>
+    <labelItem>location</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="DogWasteBins" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="128" blue="0"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>25</size>
+        <symbol>litterbins</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.dogwastebins using unique ogc_fid using srid=27700</data>
+    <labelItem>location_d</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="FloodZone2" type="POLYGON" status="OFF">
+    <Class>
+      <Style>
+        <antialias>TRUE</antialias>
+        <outlineColor red="0" green="128" blue="0"/>
+        <width>3</width>
+      </Style>
+    </Class>
+    <connection>http://environment.data.gov.uk/ds/wfs?SERVICE=WFS&amp;amp;INTERFACE=ENVIRONMENTWFS--86ec354f-d465-11e4-b09e-f0def148f590&amp;amp;version=1.0.0&amp;amp;typename=ea-wfs-nat_floodzone2_inspire</connection>
+    <connectionType>WFS</connectionType>
+    <debug>2</debug>
+    <group>ea-wfs-nat_floodzone2_inspire</group>
+    <Metadata>
+      <item name="ows_srs">EPSG:27700</item>
+      <item name="wfs_typename">ea-wfs-nat_floodzone2_inspire</item>
+      <item name="wfs_version">1.0.0</item>
+      <item name="wfs_maxfeatures">500</item>
+    </Metadata>
+  </Layer>
+  <Layer name="LeisureFacilities" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="255" green="153" blue="51"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>sports</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_leisure.leisure_facilities using unique ogc_fid using srid=27700</data>
+    <labelItem>name</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="Recycling" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="103" green="204" blue="1"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>recycling2</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.recycling using unique ogc_fid using srid=27700</data>
+    <labelItem>location</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="CarParks" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="0" green="0" blue="200"/>
+        <font>trebuc</font>
+        <offset x="0" y="17"/>
+        <partials>FALSE</partials>
+        <size>8</size>
+      </Label>
+      <Style>
+        <size>23</size>
+        <symbol>carparks3</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_externalservices.carparks using unique ogc_fid using srid=27700</data>
+    <labelItem>location</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Layer name="RecyclingCentres" status="OFF" type="POINT">
+    <Class>
+      <Label type="TRUETYPE">
+        <color red="250" green="250" blue="250"/>
+        <font>trebuc</font>
+        <offset x="0" y="16"/>
+        <partials>FALSE</partials>
+        <size>10</size>
+      </Label>
+      <Style>
+        <size>20</size>
+        <symbol>recycling3</symbol>
+      </Style>
+    </Class>
+    <connection>host=172.31.200.18 port=5432 dbname=sdw user=iShareData password=isharedata</connection>
+    <connectionType>POSTGIS</connectionType>
+    <data>wkb_geometry from edc_environment.recyclingcentres using unique ogc_fid using srid=27700</data>
+    <labelItem>town_village</labelItem>
+    <Metadata>
+      <item name="qstring_validation_pattern">.</item>
+    </Metadata>
+    <processing>"CLOSE_CONNECTION=DEFER"</processing>
+    <units>METERS</units>
+  </Layer>
+  <Legend status="OFF">
+    <imageColor red="255" green="255" blue="255"/>
+    <keySize x="20" y="10"/>
+    <keySpacing x="5" y="5"/>
+    <Label type="BITMAP">
+      <buffer>0</buffer>
+      <color red="0" green="0" blue="0"/>
+      <force>FALSE</force>
+      <minDistance>-1</minDistance>
+      <minFeatureSize>-1</minFeatureSize>
+      <offset x="0" y="0"/>
+      <partials>TRUE</partials>
+      <size>MEDIUM</size>
+    </Label>
+    <position>LL</position>
+  </Legend>
+  <maxSize>8192</maxSize>
+  <OutputFormat name="&quot;AGG_Q&quot;">
+    <driver>AGG/PNG</driver>
+    <extension>png</extension>
+    <imageMode>RGBA</imageMode>
+    <mimeType>image/png</mimeType>
+    <transparent>ON</transparent>
+  </OutputFormat>
+  <OutputFormat name="&quot;AGG_JPEG&quot;">
+    <driver>AGG/JPEG</driver>
+    <extension>JPG</extension>
+    <formatOption>interlace=off</formatOption>
+    <imageMode>RGB</imageMode>
+    <mimeType>image/jpeg</mimeType>
+  </OutputFormat>
+  <projection>init=epsg:27700</projection>
+  <QueryMap status="OFF">
+    <color red="255" green="255" blue="0"/>
+    <style>HILITE</style>
+  </QueryMap>
+  <resolution>90</resolution>
+  <ScaleBar status="OFF">
+    <color red="0" green="0" blue="0"/>
+    <imageColor red="255" green="255" blue="255"/>
+    <intervals>4</intervals>
+    <Label type="BITMAP">
+      <buffer>0</buffer>
+      <color red="0" green="0" blue="0"/>
+      <force>FALSE</force>
+      <minDistance>-1</minDistance>
+      <minFeatureSize>-1</minFeatureSize>
+      <offset x="0" y="0"/>
+      <partials>TRUE</partials>
+      <size>MEDIUM</size>
+    </Label>
+    <position>LL</position>
+    <size x="200" y="3"/>
+    <style>0</style>
+    <units>MILES</units>
+  </ScaleBar>
+  <shapePath>../</shapePath>
+  <size x="500" y="500"/>
+  <Symbol name="tic" type="PIXMAP">
+    <image>edc_custom_symbols/tic.gif</image>
+  </Symbol>
+  <Symbol name="taxirank" type="PIXMAP">
+    <image>edc_custom_symbols/T.png</image>
+  </Symbol>
+  <symbolSet>D:/mapserver/shared/symbols/symbolsms6.sym</symbolSet>
+  <templatePattern>.</templatePattern>
+  <units>METERS</units>
+  <Web>
+    <browseFormat>text/html</browseFormat>
+    <imagePath>D:/mapserver/tmp/</imagePath>
+    <imageUrl></imageUrl>
+    <legendFormat>text/html</legendFormat>
+    <log>D:\mapserver\tmp\basev5.log</log>
+    <Metadata>
+      <item name="ows_enable_request">*</item>
+    </Metadata>
+    <queryFormat>text/html</queryFormat>
+    <template>globexml.xml</template>
+  </Web>
+</Map>
+

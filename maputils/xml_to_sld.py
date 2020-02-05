@@ -290,24 +290,120 @@ class xml_to_sld(object):
             self.set_color(col, ccol)
 
     def makeFilter(self, rule, classitem, expression):
-        exprText = expression.text
+        if classitem is not None:
+            classtext = classitem.text
+        else:
+            classtext = ""
+        exprText = expression.text.strip(" ")
         if exprText is None:
             filterEl = ET.SubElement(rule, "ElseFilter")
             return
         else:
             filterEl = ET.SubElement(rule, "Filter")
-        if exprText.startswith('/'):
-            f = ET.SubElement(filterEl, "PropertyIsLike")
-            exprText = exprText.replace('/', '%')
-        else:
-            f = ET.SubElement(filterEl, "PropertyNameIsEqualTo")
+        self.process_expr(filterEl, classtext, exprText)
 
+    def process_expr(self, filterEL, classtext, exprText):
+        exprText = exprText.strip(" ")
+        if ' OR ' in exprText:
+            self.process_or(exprText, filterEL)
+            return filterEL
+        if exprText.startswith("("):
+            # a filter expression
+            self.process_regexpr(exprText, filterEL)
+            return filterEL
+        if exprText.startswith("{"):
+            # a filter expression
+            self.process_list(classtext, exprText, filterEL)
+            return filterEL
+        if exprText.startswith('/'):
+            self.process_like(exprText, classtext, filterEL)
+            return filterEL
+        else:
+            f = ET.SubElement(filterEL, "PropertyIsEqualTo")
+            prop = ET.SubElement(f, "PropertyName")
+            prop.text = classtext
+            literal = ET.SubElement(f, "Literal")
+            literal.text = exprText
+        return filterEL
+
+    def process_or(self, exprText, filterEl):
+        f = ET.SubElement(filterEl, 'Or')
+        # split epxression at OR and recursively call process expression
+        index = exprText.find("OR")
+        left = exprText[:index]
+        left = left.strip(" ")
+        left = left.lstrip("(")
+        left = left.strip(" ")
+        self.process_expr(f, None, left)
+        right = exprText[index+2:]
+        right = right.strip(" ")
+        right = right.rstrip("(")
+        right = right.strip(" ")
+        self.process_expr(f, None, right)
+
+    def process_list(self, classtext, exprText, filterEL):
+        filterOr = ET.SubElement(filterEL, "Or")
+        exprText = exprText.strip(" {}")
+        for exp in exprText.split(','):
+            f = ET.SubElement(filterOr, "PropertyIsEqualTo")
+            prop = ET.SubElement(f, "PropertyName")
+            prop.text = classtext
+            literal = ET.SubElement(f, "Literal")
+            literal.text = exp
+        return filterOr
+
+    def process_like(self, exprText, classtext, filterEl):
+        f = ET.SubElement(filterEl, "PropertyIsLike")
+        f.attrib['wildcard'] = '*'
+        f.attrib['singleChar'] = '.'
+        f.attrib['escapeChar'] = '\\'
+        exprText = exprText.replace('/', '')
+        exprText = exprText.replace("^", "").replace("$", "")
         prop = ET.SubElement(f, "PropertyName")
-        prop.text = classitem.text
+        prop.text = classtext
         literal = ET.SubElement(f, "Literal")
         literal.text = exprText
 
-    def __init__(self, input_file, root=None):
+    def process_regexpr(self, exprText, filterEL):
+        text = exprText.replace("(", "").replace(")", "")
+        text = text.strip(' ')
+        parts = text.split(' ')
+        classtext = parts[0]
+        if "[" in parts[0]:  # an attribute
+            classtext = parts[0].strip('"').strip('[').strip("]")
+        op = self.lookup_ogc_expr(parts[1])
+        text = parts[2].strip('"')
+        if filterEL is not None:
+            f = ET.SubElement(filterEL, op)
+            prop = ET.SubElement(f, "PropertyName")
+            prop.text = classtext
+            literal = ET.SubElement(f, "Literal")
+            literal.text = text
+        # return some values for testing
+        return (classtext, text, op)
+
+    def lookup_ogc_expr(self, expr):
+        ogc_expr = self.exprs[expr]
+        return ogc_expr
+
+    def __init__(self, input_file=None, root=None):
+        self.exprs = {}
+        self.exprs['eq'] = "PropertyIsEqualTo"
+        self.exprs['=='] = "PropertyIsEqualTo"
+        self.exprs['='] = "PropertyIsEqualTo"
+        self.exprs['!='] = "PropertyIsNotEqualTo"
+        self.exprs['ne'] = "PropertyIsNotEqualTo"
+        self.exprs['<'] = "PropertyIsLessThan"
+        self.exprs['lt'] = "PropertyIsLessThan"
+        self.exprs['>'] = "PropertyIsGreaterThan"
+        self.exprs['gt'] = "PropertyIsGreaterThan"
+        self.exprs['<='] = "PropertyIsLessThanOrEqualTo"
+        self.exprs['le'] = "PropertyIsLessThanOrEqualTo"
+        self.exprs['>='] = "PropertyIsGreaterThanOrEqualTo"
+        self.exprs['ge'] = "PropertyIsGreaterThanOrEqualTo"
+
+        if input_file is None:
+            return
         self.input = input_file
         self.layers = {}
         self.layer_info = {}
@@ -345,11 +441,9 @@ class xml_to_sld(object):
                     name.text = "."
                 # filter
                 classitem = layer.find(QName(ns, 'classItem'))
-                if classitem is not None:
-                    expression = class_.find(QName(ns, 'expression'))
-                    if expression is not None:
-
-                        self.makeFilter(rule, classitem, expression)
+                expression = class_.find(QName(ns, 'expression'))
+                if expression is not None:
+                    self.makeFilter(rule, classitem, expression)
                 # scale denoms
                 minscale = layer.find(QName(ns, 'minScaleDenom'))
                 if minscale is not None:

@@ -1,0 +1,4 @@
+	CONFIG "PROJ_LIB" "CustomProjections" 
+	SYMBOLSET "CustomSymbols/CustomSymbols.sym"
+	#INCLUDE "mapicons\mapicons.inc"
+	FONTSET "CustomFonts/fonts.list"

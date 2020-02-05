@@ -1,0 +1,1456 @@
+MAP
+	INCLUDE "_common.map"
+	EXTENT 475000 130000 565000 180000
+	TEMPLATEPATTERN "."
+	IMAGECOLOR 255 255 255
+	SHAPEPATH "..\Maps"
+	SIZE 512 512
+	MAXSIZE 8192
+	STATUS ON
+	UNITS METERS
+	CONFIG MS_ERRORFILE "logs\myhouse.map.error.log"
+	NAME "Astun_MyHouse"
+	# WMS vvvvvv	
+	PROJECTION   	
+		 "init=epsg:27700"   	
+	END   	
+	# WMS ^^^^^^^
+
+	IMAGETYPE png
+	OUTPUTFORMAT
+		NAME "png"
+		MIMETYPE "image/png"
+		DRIVER "AGG/PNG"
+		EXTENSION "png"
+		IMAGEMODE "RGBA"
+		TRANSPARENT TRUE
+		FORMATOPTION "TRANSPARENT=ON"
+	END
+	LEGEND
+		IMAGECOLOR 255 255 255
+		KEYSIZE 20 10
+		KEYSPACING 5 5
+		LABEL
+			FONT "verdana"
+			SIZE 8
+			TYPE TRUETYPE
+			BUFFER 0
+			COLOR 0 0 0
+			FORCE FALSE
+			MINDISTANCE -1
+			MINFEATURESIZE -1
+			OFFSET 0 0
+			PARTIALS TRUE
+		END
+		POSITION LL
+		STATUS OFF
+	END
+
+	QUERYMAP
+		COLOR 255 255 0
+		SIZE -1 -1
+		STATUS OFF
+		STYLE HILITE
+	END
+
+	SCALEBAR
+		COLOR 0 0 0
+		IMAGECOLOR 255 255 255
+		INTERVALS 4
+		LABEL
+			SIZE MEDIUM
+			TYPE BITMAP
+			BUFFER 0
+			COLOR 0 0 0
+			FORCE FALSE
+			MINDISTANCE -1
+			MINFEATURESIZE -1
+			OFFSET 0 0
+			PARTIALS TRUE
+		END
+		POSITION LL
+		SIZE 200 3
+		STATUS OFF
+		STYLE 0
+		UNITS MILES
+	END
+
+	WEB
+		IMAGEPATH "D:/mapserver/tmp/" 
+		IMAGEURL ""
+		TEMPLATE "globexml.xml"
+		METADATA
+			 ows_enable_request "*"
+			 author "Astun Technology"
+			 ows_abstract "Astun Technology iShareStandard Map File"
+			 ows_accessconstraints "http://www.ordnancesurvey.co.uk/business-and-government/public-sector/mapping-agreements/inspire-licence.html"
+			 ows_address "The Coach House, 17 West Street, Epsom, KT18 7RL"
+			 ows_addresstype "Postal"
+			 ows_attribution_onlineresource "http://www.astuntechnology.com"
+			 ows_attribution_title "Astun Technology"
+			 ows_city "Epsom"
+			 ows_contactelectronicmailaddress "notifications@astuntechnology.com"
+			 ows_contactorganization "Astun Technology"
+			 ows_contactperson "A. Person"
+			 ows_contactposition "A Manager"			 
+			 ows_country "United Kingdom"
+			 ows_getcapabilities_version "1.1.0"
+			 ows_languages "English"
+			 ows_stateorprovince "Surrey"
+			 ows_srs "EPSG:27700 EPSG:4258 EPSG:4326 EPSG:29903 EPSG:29901 EPSG:2157"
+			 ows_title "Astun MyHouse Layers"
+			 wfs_onlineresource "http://astun56.isharemaps.co.uk/iShare.Web/GetOWS.ashx?MapSource=Astun/MyHouse"
+			 wfs_maxfeatures "5000"
+			 wms_onlineresource "http://astun56.isharemaps.co.uk/iShare.Web/GetOWS.ashx?MapSource=Astun/MyHouse"
+		END
+	END
+    SYMBOL 
+        NAME "airportblack"
+        TYPE pixmap
+        IMAGE "symbols/airportblack.gif"
+    END
+    SYMBOL 
+        NAME "airportblue"
+        TYPE pixmap
+        IMAGE "symbols/airportblue.gif"
+    END
+    SYMBOL 
+        NAME "airportred"
+        TYPE pixmap
+        IMAGE "symbols/airportred.gif"
+    END
+    SYMBOL
+        NAME "H"
+        CHARACTER "H"
+        TYPE truetype
+        FONT "refsanb"
+    END
+
+
+	## Overlays Start Here ##
+	LAYER    
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480220 121008 549699 175767"
+			ows_title "Crime Statistics"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Crimes with Google Charts"
+			ows_keyword_list "crime,statistics"
+		END
+		NAME "crime_statistics"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select *, full_html as full_html_raw from crime.vw_crime_statistics) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASS
+			NAME ""
+			STYLE
+				OUTLINECOLOR 255 0 128
+				WIDTH 2
+			END
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131049 543808 175768"
+			ows_title "Area of Interest"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Surrey County Boundary"
+			ows_keyword_list "surrey, boundary"
+		END
+		NAME "area_of_interest"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from boundaryline.county_surrey) as foo using unique ogc_fid using srid=27700"
+		CLASS
+			NAME ""
+			STYLE
+				#GEOMTRANSFORM (buffer([shape], 5))  ## 5 pixels
+				OUTLINECOLOR 210 210 210
+				OPACITY 80
+				WIDTH 10
+			END   			
+			STYLE
+				OUTLINECOLOR 128 128 128
+				WIDTH 2
+			END   			
+
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131048 543813 175768"
+			ows_title "Surrey County Ward Boundaries"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Surrey County Ward Boundaries"
+			ows_keyword_list "surrey, boundaries, ward"
+		END
+		NAME "wards"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc" 					
+		DATA "wkb_geometry from (select * from boundaryline.wards_surrey) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS METERS
+		CLASS
+			NAME ""
+#			STYLE
+#				SYMBOL "/line"
+#				COLOR 255 0 128
+#				SIZE 10
+#				GAP 5
+#				WIDTH 1
+#			END
+			STYLE
+				OUTLINECOLOR 81 167 174
+				WIDTH 1
+			END
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131048 543813 175768"
+			ows_title "Surrey Parishes"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Surrey Parish Boundaries"
+			ows_keyword_list "surrey, parish, boundaries"
+		END  
+		NAME "parishes"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from boundaryline.parish_surrey where name <> '') as foo using unique ogc_fid using srid=27700"
+ 
+		TOLERANCEUNITS PIXELS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "circle"
+				COLOR 64 0 64
+				SIZE 4
+				OPACITY 50
+			END
+			STYLE
+				SYMBOL "line-dashed"
+				GAP 6
+				OUTLINECOLOR 64 0 64
+				WIDTH 2
+			END
+		END
+	END
+
+	LAYER
+	    METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131048 543813 175768"
+			ows_title "County Councillors"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "County Councillors Modern.Gov Extract"
+			ows_keyword_list "moderngov, county, councillors"
+		END  
+		NAME "county_councillors"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select *, full_html As full_html_raw from moderngov.spatial) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "hatch"
+				COLOR 64 0 64
+				SIZE 10
+				ANGLE 135
+			END
+			STYLE
+				OUTLINECOLOR 0 64 128
+				WIDTH 2
+			END
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131048 543813 175768"
+			ows_title "Members of Parliament"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "MPs Modern.Gov Extract"
+			ows_keyword_list "moderngov, government, MPs, Members of Parliament"
+		END  
+		NAME "mps"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select *, full_html As full_html_raw from moderngov.mps_spatial) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASS
+			NAME ""
+			STYLE
+				OUTLINECOLOR 255 0 128     
+				WIDTH 2
+			END
+			STYLE
+				COLOR 255 0 128     
+				OPACITY 5
+			END
+		END
+	END
+
+	LAYER
+		NAME councils
+		STATUS off
+		TYPE POLYGON
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "5513 5334 655989 1220302"
+			ows_title "Councils - all tiers"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "All tiers County, Borough, District etc fully merged from BoundaryLine"
+			ows_keyword_list "county, boundary, district, borough, boundaryline"
+		END    
+		#DUMP TRUE
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from democracy.councils_gb order by population asc) as foo using unique ogc_fid using srid=27700"
+		CLASSITEM "descriptio"
+		LABELITEM "name"
+		CLASS
+			NAME "Unitary Authorities"
+			EXPRESSION "Unitary Authority"
+			STYLE
+				OUTLINECOLOR 255 0 0
+				#GEOMTRANSFORM (buffer([shape],-1))
+				WIDTH 2
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END   			
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 8
+				COLOR 255 0 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 3
+			END
+		END
+		CLASS
+			NAME "Districts"
+			EXPRESSION "District"
+			STYLE
+				OUTLINECOLOR 0 0 255
+				WIDTH 1
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END   			
+			MAXSCALEDENOM 500000
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 8
+				COLOR 0 0 255
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 3
+
+			END
+		END
+		CLASS
+			NAME "Counties"
+			EXPRESSION "County"
+			STYLE
+				OUTLINECOLOR 0 0 255
+				WIDTH 2
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 9
+				COLOR 0 0 255
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 4
+			END
+		END
+		CLASS
+			NAME "Metropolitan Districts"
+			EXPRESSION "Metropolitan District"
+			STYLE
+				OUTLINECOLOR 0 128 0
+				WIDTH 3
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END   			
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 8
+				COLOR 0 128 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 4
+			END
+		END   	
+		CLASS
+			NAME "London Boroughs"
+			EXPRESSION "London Borough"
+			STYLE
+				OUTLINECOLOR 128 0 255
+				WIDTH 3
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END   			
+			MAXSCALEDENOM 500000
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 8
+				COLOR 128 0 255
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 4
+			END
+		END
+		CLASS
+			NAME "Greater London Authority"
+			EXPRESSION "Greater London Authority"
+			STYLE
+				OUTLINECOLOR 0 255 255
+				WIDTH 3
+			END
+			STYLE
+				COLOR 0 0 0
+				OPACITY 0
+			END   			
+			LABEL
+				FONT "verdana"
+				TYPE truetype
+				SIZE 9
+				COLOR 0 255 255
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 4
+			END
+		END   			
+	END
+
+	#land registry
+	LAYER
+	    METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480502 131048 543144 176048"
+			ows_title "Land Registry Count Sold"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "House prices paid spatial layer. Gives count of sold properties against geometry"
+			ows_keyword_list "house, prices, count, sold"
+		END    
+		NAME "landreg_pp_countsold"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from landreg.pricepaid_grid_countsold) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASSITEM "count"
+		CLASS
+			NAME "1 to 39"
+			EXPRESSION ([count] <=39)
+			STYLE
+				COLOR 255 243 222
+				OPACITY 70
+			END   			
+		END
+		CLASS
+			NAME "40 to 108"
+			EXPRESSION ([count] > 39 AND [count] <=108)
+			STYLE
+				COLOR 255 207 140
+				OPACITY 70
+			END   			
+		END
+		CLASS
+			NAME "109 to 200"
+			EXPRESSION ([count] > 108 AND [count] <=200)
+			STYLE
+				COLOR 255 142 90
+				OPACITY 70
+			END   			
+		END
+		CLASS
+			NAME "201 to 323"
+			EXPRESSION ([count] > 200 AND [count] <=323)
+			STYLE
+				COLOR 231 73 49
+				OPACITY 70
+			END   			
+		END
+		CLASS
+			NAME "324 to 538"
+			EXPRESSION ([count] > 323)
+			STYLE
+				COLOR 181 0 0
+				OPACITY 70
+			END   			
+		END
+	END
+
+	LAYER
+	    METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "479934 131133 542844 175944"
+			ows_title "Land Registry Price Paid Data"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Land Registry Price Paid Data, contains price, date sold, property type plus location information"
+			ows_keyword_list "property, price, sold, paid"
+		END   			
+		NAME "landreg_pp"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		
+		DATA "wkb_geometry from (select * from landreg.pricepaid) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		#		CLASSITEM "count"
+		CLASS
+			NAME ""
+			#			EXPRESSION ([count] <=39)
+			STYLE
+				SYMBOL "circle"
+				COLOR 0 128 0
+				SIZE 8
+			END   			
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "485792 154245 499688 165612"
+			ows_title "Surrey Planning"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Contains a snapshot of data from the Surrey Heath planning feed"
+			ows_keyword_list "planning, surrey heath, feed"
+		END  
+		NAME "surrey_planning"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from planning.surrey_planning) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "circle"
+				COLOR 0 128 0
+				SIZE 8
+			END  			
+		END
+	END
+	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "486376 158949 497867 163373"
+			ows_title "Alerts Radius"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "User alert radius for MyAlerts radius"
+			ows_keyword_list "myalerts, radius, users"
+		END  
+		NAME "alerts_radius"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "area from (select * from user_areas) as foo using unique userid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASS
+			NAME ""
+			STYLE
+				OUTLINECOLOR 0 128 0
+				SIZE 4
+			END  			
+		END
+	END
+	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Primary Schools"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Primary School locations derived from Edubase"
+			ows_keyword_list "primary, school, edubase"
+		END   	
+		NAME "primary_schools"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from education.primary_schools) as foo using unique ogc_fid using srid=27700"
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "Primary"
+				SIZE 20
+			END
+		END
+	END
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Secondary Schools"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Secondary School locations derived from Edubase"
+			ows_keyword_list "secondary, school, edubase"
+		END  
+		NAME "secondary_schools"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from education.secondary_schools) as foo using unique ogc_fid using srid=27700"
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "Secondary"
+				SIZE 20
+			END
+		END
+	END
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Independent Schools"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Independent School locations derived from Edubase"
+			ows_keyword_list "independant, school, edubase"
+		END   	
+		NAME "independant_schools"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from education.independent_schools where establishment_status != 'Closed') as foo using unique ogc_fid using srid=27700"
+
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "independant"
+				SIZE 20
+			END
+		END
+	END
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Special Schools"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Special School locations derived from Edubase"
+			ows_keyword_list "special, school, edubase"
+		END   
+		NAME "special_schools"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from education.special_schools where establishment_status != 'Closed') as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "specialschool"
+				SIZE 20
+			END
+		END
+	END
+
+	#NHS
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Doctors"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Doctors within 5km of Surrey from NHS Choices"
+			ows_keyword_list "doctors, nhs choices"
+		END   
+		NAME "Doctors"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from nhs_choices.doctors) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "doctors"
+				SIZE 20
+			END
+		END
+	END	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Dentists"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Dentists within 5km of Surrey from NHS Choices"
+			ows_keyword_list "doctors, nhs choices"
+		END   
+		NAME "Dentists"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from nhs_choices.dentists) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "dentists"
+				SIZE 20
+			END
+		END
+	END	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Hospitals"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Hospitals within 5km of Surrey from NHS Choices"
+			ows_keyword_list "hospitals, nhs choices"
+		END   
+		NAME "Hospitals"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from nhs_choices.hospitals) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "hospitals2"
+				SIZE 20
+			END
+		END
+	END	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Pharmacies"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Pharmacies within 5km of Surrey from NHS Choices"
+			ows_keyword_list "pharmacies, nhs choices"
+		END   
+		NAME "Pharmacies"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from nhs_choices.pharmacies) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "hospitals"
+				SIZE 20
+			END
+		END
+	END	
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "482923 132470 541451 173944"
+			ows_title "Opticians"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Opticians within 5km of Surrey from NHS Choices"
+			ows_keyword_list "opticians, nhs choices"
+		END   
+		NAME "Opticians"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from nhs_choices.opticians) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "optician"
+				SIZE 20
+			END
+		END
+	END	
+	#transport
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "69885 10183 633395 1172566"
+			ows_title "Transport - Airports"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Airports derived from OS Strategi"
+			ows_keyword_list "transport, airports"
+		END   	
+		NAME "transport_airport"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select ogc_fid, wkb_geometry, trim(legend) as customs, trim(name) as name, trim(usage) as usage from transport.airport) as foo using unique ogc_fid using srid=27700"
+		UNITS METERS
+		CLASSITEM "usage"
+		LABELITEM "name"
+		CLASS
+			NAME "Worldwide"
+			EXPRESSION "Worldwide"
+			STYLE
+				SYMBOL "circle"
+				COLOR 255 255 255
+				OUTLINECOLOR 0 0 0
+				WIDTH 2
+				SIZE 28
+			END
+			STYLE
+                SYMBOL "airportblack"
+			END
+			LABEL
+				FONT "arial"
+				TYPE truetype
+				SIZE 8
+				COLOR 0 0 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				WRAP " "
+				ALIGN CENTER
+				POSITION LC
+			END   	
+		END
+		CLASS
+			NAME "European"
+			EXPRESSION "European"
+			STYLE
+				SYMBOL "circle"
+				COLOR 255 255 255
+				OUTLINECOLOR 0 0 255
+				WIDTH 2
+				SIZE 26
+			END
+			STYLE
+				SYMBOL "airportblue"
+                SIZE 16
+			END
+			LABEL
+				FONT "arial"
+				TYPE truetype
+				SIZE 8
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				WRAP " "
+				ALIGN CENTER
+				POSITION LC
+			END   	
+		END
+		CLASS
+			NAME "GB only"
+			EXPRESSION "GB only"			
+			STYLE
+				SYMBOL "circle"
+				COLOR 255 255 255
+				OUTLINECOLOR 255 0 0
+				WIDTH 2
+				SIZE 28
+			END
+			STYLE
+				SYMBOL "airportred"
+                SIZE 24
+			END
+			LABEL
+				FONT "arial"
+				TYPE truetype
+				SIZE 8
+				COLOR 0 0 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				WRAP " "
+				ALIGN CENTER
+				POSITION LC
+			END   	
+		END
+
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "63040 8570 655173 1216460"
+			ows_title "Transport - Bus Stops"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Bus Stops derived from OS Strategi"
+			ows_keyword_list "transport, bus, stops"
+		END   	
+		NAME "transport_bus"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select tb.ogc_fid, tb.wkb_geometry, tb.landmark, tb.commonname from transport.bus tb) as foo using unique ogc_fid using srid=27700"	
+		UNITS METERS
+		MAXSCALEDENOM 100000
+		CLASS
+			NAME "Max 1:50,000"
+			MAXSCALEDENOM 50000
+			STYLE
+				SYMBOL "circle"
+				COLOR 255 128 0
+				OUTLINECOLOR 0 0 0
+				SIZE 7
+			END
+		END
+		CLASS
+			NAME "Max 1:100,000"
+			STYLE
+				SYMBOL "circle"
+				COLOR 255 128 0
+				OUTLINECOLOR 0 0 0
+				SIZE 4
+				MINSCALEDENOM 50000
+				MAXSCALEDENOM 100000
+			END
+		END   		
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "471146 124876 554592 185990"
+			ows_title "Transport - Cycle Network"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Cycle Network derived from ..."
+			ows_keyword_list "transport, cycle, network"
+		END   
+		NAME "transport_cyclenetwork"
+		STATUS OFF
+		TYPE LINE
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select min(ogc_fid) as ogc_fid, web_name, st_collect(wkb_geometry) as wkb_geometry from transport.cyclenetwork group by web_name) as foo using unique ogc_fid using srid=27700"	
+		UNITS METERS
+		LABELITEM "web_name"
+		CLASS
+			NAME ""
+			STYLE
+				COLOR 0 64 64
+				OUTLINECOLOR 0 0 0
+				WIDTH 3
+			END
+			LABEL
+				FONT "arial"
+				TYPE truetype
+				SIZE 9
+				COLOR 0 64 64
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				PARTIALS TRUE
+				ANGLE FOLLOW
+				BUFFER 3
+			END   	
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "147600 30600 654747 967920"
+			ows_title "Transport - Train stations"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Train stations derived from OS Strategi"
+			ows_keyword_list "train, stations, transport"
+		END   
+		NAME "transport_train"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select ogc_fid, wkb_geometry, crscode,replace(stationnam, ' Rail Station','') as stationnam from transport.train) as foo using unique ogc_fid using srid=27700"
+	
+		UNITS METERS
+		LABELITEM "stationnam"
+		CLASS
+			NAME ""
+			MAXSCALEDENOM 100000
+			STYLE
+				SYMBOL "rail"
+			END   	
+			LABEL
+				FONT "arialbd"
+				TYPE truetype
+				SIZE 8
+				COLOR 198 0 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				WRAP " "
+				ALIGN CENTER
+				POSITION LC
+				BUFFER 5
+			END   	
+		END
+		CLASS
+			NAME ""
+			MINSCALEDENOM 100000
+			STYLE
+				SYMBOL "square"
+				COLOR 221 11 0
+				SIZE 8
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 3
+			END   	
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "89466 13998 526604 665538"
+			ows_title "Transport - Heliport"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Heliport derived from OS Strategi"
+			ows_keyword_list "heliport, transport"
+		END   
+		NAME "transport_heliport"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select ogc_fid, wkb_geometry, name from transport.heliport) as foo using unique ogc_fid using srid=27700"	
+		UNITS METERS
+		LABELITEM "name"
+		CLASS
+			NAME ""
+			STYLE
+				SYMBOL "circle"
+				COLOR 0 0 0 
+				SIZE 22
+			END
+			STYLE
+				SYMBOL "circle"
+				COLOR 0 0 0
+				OUTLINECOLOR 255 255 255
+				WIDTH 2
+				SIZE 16
+			END
+			STYLE
+				SYMBOL "H"
+				COLOR 255 255 255
+				SIZE 10
+			END
+			LABEL
+				FONT "arialbd"
+				TYPE truetype
+				SIZE 8
+				COLOR 0 0 0
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 2
+				WRAP " "
+				ALIGN CENTER
+				POSITION LC
+				BUFFER 5
+			END   	
+
+		END
+	END
+
+	#police.uk etc
+	#	LAYER
+	#		NAME "crimestreets_display"
+	#		STATUS DEFAULT
+	#		TYPE POINT
+	#		INCLUDE "datashare.inc"
+	#		DATA "wkb_geometry from (select * from crime.street_accumulated) as foo using unique ogc_fid using srid=27700"
+	#		#seems like REQUIRES doesn't work with CHART layer below
+	#		REQUIRES "[crimestreets]"
+	#		CLASS
+	#			MINSCALEDENOM 30000
+	#			STYLE
+	#				SYMBOL "circle"
+	#				COLOR 24 24 24
+	#				SIZE 2
+	#			END
+	#		END
+	#	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480282 131790 544540 176090"
+			ows_title "Transport - Road Accidents"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Road Accidents derived from ..."
+			ows_keyword_list "accidents, transport, road"
+		END   
+		NAME "transport_road_accidents"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from transport.road_accidents) as foo using unique ogc_fid using srid=27700"
+		TOLERANCE 100
+		UNITS PIXELS
+		CLASS
+			NAME "Actual accidents"
+			STYLE
+				MAXSCALEDENOM 25000
+				SYMBOL "circle"
+				SIZE 5
+				COLOR 255 0 0
+			END          
+		END
+		CLASS
+			NAME "Accident clusters"
+			MAXSCALEDENOM 1
+			STYLE
+				SYMBOL "circle"
+				SIZE 26
+				COLOR 255 255 255
+				OUTLINECOLOR 0 0 0
+				WIDTH 6
+				OPACITY 10
+			END
+			STYLE
+				SYMBOL "circle"
+				SIZE 20
+				COLOR 255 255 255
+				OUTLINECOLOR 0 0 0
+				WIDTH 6
+				OPACITY 30
+			END          
+			STYLE
+				SYMBOL "circle"
+				SIZE 16
+				COLOR 255 255 255
+				OUTLINECOLOR 40 40 40
+				WIDTH 3
+			END
+		END      
+	END
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "480282 131790 544540 176090"
+			ows_title "Transport - Road Accidents Clusters"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Road Accidents Clusters derived from ..."
+			ows_keyword_list "accidents, transport, road, clusters"
+		END   
+		NAME "transport_roadaccidents_clusters"
+		REQUIRES "[transport_road_accidents]"
+		STATUS DEFAULT
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from transport.road_accidents) as foo using unique ogc_fid using srid=27700"
+		INCLUDE "transport_road_accidents_clusters.lyr"
+	END
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "481857 132292 542505 174924"
+			ows_title "Street Crime"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Street Crime"
+			ows_keyword_list "crime, street"
+		END 
+		NAME "crimestreets"
+		STATUS OFF
+		TYPE CHART
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from crime.street_accumulated) as foo using unique ogc_fid using srid=27700"
+		MAXSCALEDENOM 30000
+		#http://mapserver.org/output/dynamic_charting.html#setup
+		PROCESSING "CHART_TYPE=pie"
+		PROCESSING "CHART_SIZE_RANGE=total_crime 6 40 1 15"
+		#PROCESSING "CHART_SIZE=24"
+		CLASS
+			NAME "Burglary"
+			STYLE
+				SIZE [burglary]
+				COLOR 0 255 0
+			END
+		END
+		CLASS
+			NAME "Criminal damage arson"
+			STYLE
+				SIZE [criminal_damage_arson]
+				COLOR 0 0 255
+			END
+		END
+		CLASS
+			NAME "Drugs"
+			STYLE
+				SIZE [drugs]
+				COLOR 128 0 255
+			END
+		END
+		CLASS
+			NAME "Other crime"
+			STYLE
+				SIZE [other_crime]
+				COLOR 255 128 0
+			END
+		END
+		CLASS
+			NAME "Other theft"
+			STYLE
+				SIZE [other_theft]
+				COLOR 0 128 255
+			END
+		END
+		CLASS
+			NAME "Public disorder"
+			STYLE
+				SIZE [public_disorder]
+				COLOR 0 255 128
+			END
+		END
+		CLASS
+			NAME "Robbery"
+			STYLE
+				SIZE [robbery]
+				COLOR 128 128 0
+			END
+		END
+		CLASS
+			NAME "Shoplifting"
+			STYLE
+				SIZE [shoplifting]
+				COLOR 0 128 0
+			END
+		END
+		CLASS
+			NAME "Vehicle crime"
+			STYLE
+				SIZE [vehicle_crime]
+				COLOR 0 0 128
+			END
+		END
+		CLASS
+			NAME "Violent crime"
+			STYLE
+				SIZE [violent_crime]
+				COLOR 255 0 0    
+			END
+		END
+		CLASS
+			NAME "**Max scale of 1:30,000"
+			STYLE
+				SIZE 0
+			END
+		END
+	END
+
+	LAYER
+		METADATA
+			qstring_validation_pattern "."
+			qstr_validation_pattern "."
+			ows_extent "479939 131036 542825 175969"
+			ows_title "Address Information"
+			gml_featureid "ogc_fid"
+			gml_include_items "all"
+			gml_types "auto"
+			ows_abstract "Address Information"
+			ows_keyword_list "addresses"
+		END 
+		NAME "addresses"
+		STATUS OFF
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select \"UniqueId\" as ogc_fid, wkb_geometry,\"Name\" as name, \"Postcode\" as postcode  from public.\"AstunLocationLookup\") as foo using unique ogc_fid using srid=27700"  			
+		MAXSCALEDENOM 30000
+		CLASS
+			NAME "**Max scale 1:30,000"
+			STYLE
+				SYMBOL "circle"
+				SIZE 6
+				COLOR 128 0 64
+			END
+		END
+	END
+
+	LAYER
+		NAME "workshoppolygons"
+		STATUS OFF
+		TYPE POLYGON
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from workshop.workshop_polygons) as foo using unique ogc_fid using srid=27700"
+		TOLERANCEUNITS PIXELS
+		CLASSITEM "name"
+		CLASS
+			NAME ""
+			STYLE	
+				OUTLINECOLOR 255 0 128
+				WIDTH 2
+			END
+		END
+	END
+
+	LAYER
+		NAME workshoppoints
+		REQUIRES "[workshoppolygons]"
+		STATUS DEFAULT
+		TYPE POINT
+		INCLUDE "datashare.inc"
+		DATA "wkb_geometry from (select * from workshop.workshop_points) as foo using unique ogc_fid using srid=27700"
+		CLASSITEM "icon"
+		CLASS
+			NAME "Cafes"
+			EXPRESSION "cafe"
+			STYLE
+			SYMBOL "cafe"
+				SIZE 14
+			END
+		END
+		CLASS
+			NAME "Camping Sites"
+			EXPRESSION "camping"
+			STYLE
+			SYMBOL "camping"
+				SIZE 14
+			END
+		END
+		CLASS
+			NAME "Car Parks"
+			EXPRESSION "carpark"
+			STYLE
+			SYMBOL "carparks1"
+				SIZE 14
+			END
+		END
+		CLASS
+			NAME "Bars"
+			EXPRESSION "bar"
+			STYLE
+			SYMBOL "pub"
+				SIZE 14
+			END
+		END
+	END	
+
+	#LAYER
+	#	NAME "primarytestdata"
+	#	STATUS OFF
+	#	TYPE POINT
+	#	INCLUDE "datashare.inc"
+	#	DATA "wkb_geometry from (select * from testprimary) as foo using unique ogc_fid using srid=27700"
+	#	METADATA
+	#		 "qstring_validation_pattern" "."
+	#		 ows_title "primary test data"
+	#		 ows_abstract "primary test data"
+	#	END  	
+	#	UNITS METERS
+	#	CLASS
+	#		NAME ""
+	#		STYLE
+	#			SYMBOL "circle"
+	#			COLOR 255 0 0
+	#			SIZE 20
+	#		END
+	#	END
+	#END
+
+	#end of map file
+END

@@ -1,5 +1,5 @@
 MAP
-   INCLUDE './maputils/tests/mapfiles/symbols.inc'
+   INCLUDE 'tests/mapfiles/symbols.inc'
    LAYER
        NAME "test"
        TYPE POLYGON

@@ -2,14 +2,18 @@
 
 ## Installation
 
-Requires python 2.7 
+Requires python 3+
 
 Fetch latest egg file from dist directory and run (e.g.) `easy_install mapfile_utils-1.1.0-py2.7.egg`
 
 
 ## Development
 
-sudo python setup.py install
+    sudo python setup.py install
+
+To run the tests use:
+
+    python -m unittest tests/test_map_to_xml.py
     
 ## Usage
 
