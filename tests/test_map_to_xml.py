@@ -12,6 +12,7 @@ def ignore_warnings(test_func):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             test_func(self, *args, **kwargs)
+
     return do_test
 
 
@@ -41,7 +42,8 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(layer is not None)
         # print(sldStore.getLayer(layer).find(".//WellKnownName"))
-        self.assertTrue(sldStore.getLayer(layer).find(".//WellKnownName") is not None)
+        self.assertTrue(
+            sldStore.getLayer(layer).find(".//WellKnownName") is not None)
 
     @ignore_warnings
     def test_read_symbols(self):
@@ -53,7 +55,8 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(layer is not None)
 
         # print(sldStore.getLayer(layer).find(".//WellKnownName"))
-        self.assertTrue(sldStore.getLayer(layer).find(".//WellKnownName") is not None)
+        self.assertTrue(
+            sldStore.getLayer(layer).find(".//WellKnownName") is not None)
 
     def read_map_file(self, file):
         obs = map_to_xml.map_to_xml(input_file=file)
@@ -93,6 +96,60 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertTrue(good)
 
     @ignore_warnings
+    def test_raster(self):
+        instr = """MAP
+        LAYER
+            NAME "air_quality"
+            DATA "AirQuality/Dudley_Classified_NoPalette.tif"
+            TYPE RASTER
+            STATUS OFF
+            CLASSITEM "[pixel]"
+            CLASS
+                NAME "36-40 microgrammes/cubic metre"
+                EXPRESSION ([pixel] < 100)
+                STYLE
+                    COLOR 255 255 0
+                END
+            END
+            CLASS
+                NAME "40-44 microgrammes/cubic metre"
+                EXPRESSION ([pixel] < 150)
+                STYLE
+                    COLOR 255 150 0
+                END
+            END
+            CLASS
+                NAME "44-60 microgrammes/cubic metre"
+                EXPRESSION ([pixel] < 175)
+                STYLE
+                    COLOR 255 75 0
+                END
+            END
+            CLASS
+                NAME "Over 60 microgrammes/cubic metre"
+                EXPRESSION ([pixel] < 225)
+                STYLE
+                    COLOR 200 0 0
+                END
+            END
+        END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # print("layer", layer)
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(layer is not None)
+            self.assertTrue(
+                layer.find(".//ColorMap") is not None)
+            self.assertTrue(
+                layer.find(".//ColorMapEntry") is not None)
+            expected = ['100', '150', '175', '225']
+            for _i, cme in enumerate(sldStore.getLayer(layer).iterfind(".//ColorMapEntry")):
+                self.assertEquals(expected[_i], cme.attrib['quantity'])
+
+    @ignore_warnings
     def test_marks(self):
         instr = """MAP
         LAYER
@@ -122,8 +179,10 @@ class Test_update_mapsource(unittest.TestCase):
             # print("layer", layer)
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//Fill") is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//Stroke") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Fill") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Stroke") is not None)
 
     @ignore_warnings
     def test_property_name(self):
@@ -157,7 +216,9 @@ class Test_update_mapsource(unittest.TestCase):
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
+                not None)
 
     @ignore_warnings
     def test_like_filter(self):
@@ -203,14 +264,79 @@ class Test_update_mapsource(unittest.TestCase):
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//Literal") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Literal") is not None)
             self.assertEqual("Commercial.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
     @ignore_warnings
-    def test_expression_in_filter(self):
+    def test_like2_filter(self):
         instr = """MAP
+            LAYER
+                NAME "loc_bs7666"
+                TYPE POINT
+                CLASS
+                    NAME "Commercial"
+                    EXPRESSION ('[owner]' ~* 'Dudley MBC.*$')
+                    STYLE
+                        COLOR 0 0 255
+                        SIZE 6
+                        SYMBOL 'CIRCLE'
+                    END
+
+                END
+            END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Literal") is not None)
+            self.assertEqual("Dudley MBC.*",
+                             sldStore.getLayer(layer).find(".//Literal").text)
+
+    @ignore_warnings
+    def test_like3_filter(self):
+        instr = """MAP
+            LAYER
+                NAME "loc_bs7666"
+                TYPE POINT
+                CLASS
+                    NAME "Commercial"
+                    EXPRESSION ('[owner]' ~ 'Dudley MBC.*$')
+                    STYLE
+                        COLOR 0 0 255
+                        SIZE 6
+                        SYMBOL 'CIRCLE'
+                    END
+
+                END
+            END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Literal") is not None)
+            self.assertEqual("Dudley MBC.*",
+                             sldStore.getLayer(layer).find(".//Literal").text)
+
+    @ignore_warnings
+    def test_expression_in_filter(self):
+        instr = """
+        MAP
             LAYER
                 NAME "tra_edu_dcc_hazroutes"
                 TYPE LINE
@@ -264,42 +390,61 @@ class Test_update_mapsource(unittest.TestCase):
         obs = map_to_xml.map_to_xml(input_string=instr)
         root = obs.map_root
         sldStore = xml_to_sld.xml_to_sld("", root=root)
-        expected = [("req_traffic_monitoriing", 'T'),
-                    ("hazardous", 'T'),
+        expected = [("req_traffic_monitoriing", 'T'), ("hazardous", 'T'),
                     ("hazardous", 'F')]
         layerCount = 0
         for layer in sldStore.layers:
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//PropertyName") is not None)
-            self.assertEqual(expected[layerCount][0],
-                             sldStore.getLayer(layer).find(".//PropertyName").text)
-            self.assertTrue(sldStore.getLayer(layer).find(".//Literal") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
+                not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyName") is not None)
+            self.assertEqual(
+                expected[layerCount][0],
+                sldStore.getLayer(layer).find(".//PropertyName").text)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//Literal") is not None)
             self.assertEqual(expected[layerCount][-1],
                              sldStore.getLayer(layer).find(".//Literal").text)
 
     @ignore_warnings
     def test_process_expr(self):
         xsld = xml_to_sld.xml_to_sld()
-        (classitem, expr, op) = xsld.process_regexpr('("[req_traffic_monitoriing]" eq "T" )', None)
+        (classitem, expr,
+         op) = xsld.process_regexpr('("[req_traffic_monitoriing]" eq "T" )',
+                                    None)
         self.assertEqual("req_traffic_monitoriing", classitem)
-        self.assertEqual("T", expr)
+        self.assertEqual('"T"', expr)
         self.assertEqual("PropertyIsEqualTo", op)
-        (classitem, expr, op) = xsld.process_regexpr('("[req_traffic_monitoriing]" = "T" )', None)
+        (classitem, expr,
+         op) = xsld.process_regexpr('("[req_traffic_monitoriing]" = "T" )',
+                                    None)
         self.assertEqual("req_traffic_monitoriing", classitem)
-        self.assertEqual("T", expr)
+        self.assertEqual('"T"', expr)
         self.assertEqual("PropertyIsEqualTo", op)
-        (classitem, expr, op) = xsld.process_regexpr('("[req_traffic_monitoriing]" lt "T" )', None)
+        (classitem, expr,
+         op) = xsld.process_regexpr('("[req_traffic_monitoriing]" lt "T" )',
+                                    None)
         self.assertEqual("req_traffic_monitoriing", classitem)
-        self.assertEqual("T", expr)
+        self.assertEqual('"T"', expr)
         self.assertEqual("PropertyIsLessThan", op)
+
+    @ignore_warnings
+    def test_process_expr_with_space(self):
+        xsld = xml_to_sld.xml_to_sld()
+        (classitem, expr,
+         op) = xsld.process_regexpr('("[tag_desc]"  = "Group Order (Not Confirmed)" )',
+                                    None)
+        self.assertEqual("tag_desc", classitem)
+        self.assertEqual('"Group Order (Not Confirmed)"', expr)
+        self.assertEqual("PropertyIsEqualTo", op)
 
     @ignore_warnings
     def test_process_expr_with_or(self):
         xsld = xml_to_sld.xml_to_sld()
         filter = xsld.process_expr(
-            ET.Element("Filter"),
-            "",
+            ET.Element("Filter"), "",
             "( ( [alc_grade] eq 3A ) OR ( [alc_grade] eq 3B ) )")
         properties = filter.findall(".//PropertyName")
         self.assertEqual("alc_grade", properties[0].text)
@@ -307,6 +452,105 @@ class Test_update_mapsource(unittest.TestCase):
         literals = filter.findall(".//Literal")
         self.assertEqual("3A", literals[0].text)
         self.assertEqual("3B", literals[1].text)
+
+    @ignore_warnings
+    def test_process_expr_with_and(self):
+        xsld = xml_to_sld.xml_to_sld()
+        filter = xsld.process_expr(
+            ET.Element("Filter"), "",
+            "( ( [alc_grade] eq 3A ) AND ( [alc_grade] eq 3B ) )")
+        # ET.dump(filter)
+        properties = filter.findall(".//PropertyName")
+        self.assertEqual("alc_grade", properties[0].text)
+        self.assertEqual("alc_grade", properties[1].text)
+        literals = filter.findall(".//Literal")
+        self.assertEqual("3A", literals[0].text)
+        self.assertEqual("3B", literals[1].text)
+
+    @ignore_warnings
+    def test_complex_in_expressions(self):
+        instr = """MAP
+            LAYER
+                    NAME "tra_edu_dcc_hazroutes"
+                TYPE LINE
+                STATUS OFF
+                CLASS
+                    NAME "Grade 3A or 3B"
+                    EXPRESSION ("[status_code]" IN "LBI,LBII*,LBD")
+                    STYLE
+                        COLOR 255 128 64
+                        OPACITY 50
+                        OUTLINECOLOR 255 128 64
+
+                    END
+
+                END
+            END
+        END"""
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
+                not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsLike") is
+                not None)
+            properties = sldStore.getLayer(layer).findall(".//PropertyName")
+            self.assertTrue(properties is not None)
+            self.assertEqual("status_code", properties[0].text)
+            self.assertEqual("status_code", properties[1].text)
+            self.assertEqual("status_code", properties[2].text)
+            literals = sldStore.getLayer(layer).findall(".//Literal")
+            self.assertTrue(literals is not None)
+            self.assertEqual("LBI",  literals[0].text)
+            self.assertEqual("LBII*", literals[1].text)
+            self.assertEqual("LBD",  literals[2].text)
+
+    @ignore_warnings
+    def test_simple_in_expressions(self):
+        instr = """MAP
+            LAYER
+                    NAME "tra_edu_dcc_hazroutes"
+                TYPE LINE
+                STATUS OFF
+                CLASS
+                    NAME "Grade 3A or 3B"
+                    EXPRESSION ("[status_code]" IN "LBI,LBII,LBD")
+                    STYLE
+                        COLOR 255 128 64
+                        OPACITY 50
+                        OUTLINECOLOR 255 128 64
+
+                    END
+
+                END
+            END
+        END"""
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
+                not None)
+            properties = sldStore.getLayer(layer).findall(".//PropertyName")
+            self.assertTrue(properties is not None)
+            self.assertEqual("status_code", properties[0].text)
+            self.assertEqual("status_code", properties[1].text)
+            self.assertEqual("status_code", properties[2].text)
+            literals = sldStore.getLayer(layer).findall(".//Literal")
+            self.assertTrue(literals is not None)
+            self.assertEqual("LBI",  literals[0].text)
+            self.assertEqual("LBII", literals[1].text)
+            self.assertEqual("LBD",  literals[2].text)
 
     @ignore_warnings
     def test_list_expressions(self):
@@ -336,7 +580,9 @@ class Test_update_mapsource(unittest.TestCase):
         for layer in sldStore.layers:
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
+                not None)
             properties = sldStore.getLayer(layer).findall(".//PropertyName")
             self.assertTrue(properties is not None)
             self.assertEqual("ian", properties[0].text)
@@ -345,3 +591,44 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(literals is not None)
             self.assertEqual("Grade 3a", literals[0].text)
             self.assertEqual("Grade 3b", literals[1].text)
+
+    @ignore_warnings
+    def test_dashed_paths(self):
+        instr = """
+        MAP
+            LAYER
+                NAME "tra_edu_dcc_hazroutes"
+                TYPE LINE
+                STATUS OFF
+                CLASSITEM ian
+                CLASS
+                    NAME "Footpath"
+                    EXPRESSION "Footpath"
+                    LABEL
+                        TYPE TRUETYPE
+                        ANGLE AUTO
+                        COLOR 255 128 0
+
+                        FONT verdana
+                        OUTLINECOLOR 255 255 255
+                        OUTLINEWIDTH 1
+                        SIZE 6
+                        MAXSCALEDENOM 15000
+                    END
+                    STYLE
+                        COLOR 255 128 0
+                        PATTERN 5 5 END
+                        SIZE 5
+                        SYMBOL dashed
+                    END
+                END
+            END
+        END
+        """
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)

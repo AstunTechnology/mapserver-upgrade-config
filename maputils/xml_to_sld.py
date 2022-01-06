@@ -28,11 +28,14 @@ class XQName(QName):
 class xml_to_sld(object):
 
     def set_color(self, target, color):
+        target.text = self.getColor(color)
+
+    def getColor(self, color):
         colors = []
         colors.append(color.get('red'))
         colors.append(color.get('green'))
         colors.append(color.get('blue'))
-        target.text = "#" + "".join("{:02X}".format(int(a)) for a in colors)
+        return "#" + "".join("{:02X}".format(int(a)) for a in colors)
 
     def getStroke(self, style, symbol, isLine=False, in_graphic=False):
         if not in_graphic:
@@ -73,6 +76,7 @@ class xml_to_sld(object):
                                         name="stroke-linejoin")
             stroke_join.text = line_join.text
         line_dash = style.find('{http://www.mapserver.org/mapserver}pattern')
+        # print("line_dash", line_dash)
         if line_dash is None:
             line_dash = style.find('{http://www.mapserver.org/mapserver}gap')
         if line_dash is not None:
@@ -118,6 +122,21 @@ class xml_to_sld(object):
             return True
         else:
             return False
+
+    def buildColorMap(self, layer, symbolizer, ns):
+        cm = ET.SubElement(symbolizer, "ColorMap")
+        for class_ in layer.iterfind(QName(ns, 'Class')):
+            cme = ET.SubElement(cm, "ColorMapEntry")
+            cme.attrib['label'] = class_.attrib['name']
+            for style in class_.iterfind(QName(ns, 'Style')):
+                color = style.find('{http://www.mapserver.org/mapserver}color')
+                cme.attrib['color'] = self.getColor(color)
+
+            expression = class_.find(QName(ns, 'expression'))
+            text = expression.text.strip("( )")
+            text = text.replace('  ', ' ')
+            parts = text.split(' ')
+            cme.attrib['quantity'] = parts[-1]
 
     def buildGraphic(self, symbol, graphic, loc):
         eg = ET.SubElement(graphic, "ExternalGraphic")
@@ -304,19 +323,25 @@ class xml_to_sld(object):
 
     def process_expr(self, filterEL, classtext, exprText):
         exprText = exprText.strip(" ")
+        if ' AND ' in exprText:
+            self.process_and(exprText, filterEL)
+            return filterEL
         if ' OR ' in exprText:
             self.process_or(exprText, filterEL)
             return filterEL
-        if exprText.startswith("("):
-            # a filter expression
-            self.process_regexpr(exprText, filterEL)
-            return filterEL
-        if exprText.startswith("{"):
+        if exprText.startswith("{") or ' IN ' in exprText:
             # a filter expression
             self.process_list(classtext, exprText, filterEL)
             return filterEL
         if exprText.startswith('/'):
             self.process_like(exprText, classtext, filterEL)
+            return filterEL
+        if ' ~ ' in exprText or ' ~* ' in exprText:
+            self.process_likeexp(exprText, classtext, filterEL)
+            return filterEL
+        if exprText.startswith("("):
+            # a filter expression
+            self.process_regexpr(exprText, filterEL)
             return filterEL
         else:
             f = ET.SubElement(filterEL, "PropertyIsEqualTo")
@@ -325,6 +350,21 @@ class xml_to_sld(object):
             literal = ET.SubElement(f, "Literal")
             literal.text = exprText
         return filterEL
+
+    def process_and(self, exprText, filterEl):
+        f = ET.SubElement(filterEl, 'And')
+        # split epxression at AND and recursively call process expression
+        index = exprText.find("AND")
+        left = exprText[:index]
+        left = left.strip(" ")
+        left = left.lstrip("(")
+        left = left.strip(" ")
+        self.process_expr(f, None, left)
+        right = exprText[index+3:]
+        right = right.strip(" ")
+        right = right.rstrip("(")
+        right = right.strip(" ")
+        self.process_expr(f, None, right)
 
     def process_or(self, exprText, filterEl):
         f = ET.SubElement(filterEl, 'Or')
@@ -343,13 +383,26 @@ class xml_to_sld(object):
 
     def process_list(self, classtext, exprText, filterEL):
         filterOr = ET.SubElement(filterEL, "Or")
-        exprText = exprText.strip(" {}")
+        # print(exprText)
+        exprText = exprText.strip(" {}()")
+        if ' IN ' in exprText:
+            parts = exprText.split("IN")
+            classtext = parts[0]
+            exprText = parts[1]
+            if "[" in parts[0]:  # an attribute
+                classtext = parts[0].replace(']', '').replace('[', '').strip()
         for exp in exprText.split(','):
-            f = ET.SubElement(filterOr, "PropertyIsEqualTo")
+            if '*' in exp:
+                f = ET.SubElement(filterOr, "PropertyIsLike")
+                f.attrib['wildcard'] = '*'
+                f.attrib['singleChar'] = '.'
+                f.attrib['escapeChar'] = '\\'
+            else:
+                f = ET.SubElement(filterOr, "PropertyIsEqualTo")
             prop = ET.SubElement(f, "PropertyName")
             prop.text = classtext
             literal = ET.SubElement(f, "Literal")
-            literal.text = exp
+            literal.text = exp.strip()
         return filterOr
 
     def process_like(self, exprText, classtext, filterEl):
@@ -357,6 +410,7 @@ class xml_to_sld(object):
         f.attrib['wildcard'] = '*'
         f.attrib['singleChar'] = '.'
         f.attrib['escapeChar'] = '\\'
+        f.attrib['matchCase'] = 'true'
         exprText = exprText.replace('/', '')
         exprText = exprText.replace("^", "").replace("$", "")
         prop = ET.SubElement(f, "PropertyName")
@@ -364,22 +418,46 @@ class xml_to_sld(object):
         literal = ET.SubElement(f, "Literal")
         literal.text = exprText
 
+    def process_likeexp(self, exprText, classtext, filterEl):
+        f = ET.SubElement(filterEl, "PropertyIsLike")
+        f.attrib['wildcard'] = '*'
+        f.attrib['singleChar'] = '.'
+        f.attrib['escapeChar'] = '\\'
+        exprText = exprText.replace('(', '').replace(')', '')
+        exprText = exprText.replace("^", "").replace("$", "")
+
+        index = exprText.find('~')
+        classtext = exprText[:index]
+        if ' ~*' in exprText:
+            f.attrib['matchCase'] = 'false'
+            exprText = exprText[index+2:]
+        else:
+            f.attrib['matchCase'] = 'true'
+            exprText = exprText[index+1:]
+        prop = ET.SubElement(f, "PropertyName")
+        prop.text = classtext.strip()
+        literal = ET.SubElement(f, "Literal")
+        literal.text = exprText.strip()
+
     def process_regexpr(self, exprText, filterEL):
-        text = exprText.replace("(", "").replace(")", "")
-        text = text.strip(' ')
+        text = exprText.strip("( )")
+        text = text.replace('  ', ' ')
         parts = text.split(' ')
         classtext = parts[0]
         if "[" in parts[0]:  # an attribute
-            classtext = parts[0].strip('"').strip('[').strip("]")
+            classtext = parts[0].strip('"[]')
         op = self.lookup_ogc_expr(parts[1])
-        text = parts[2].strip('"')
+        text = ' '.join(parts[2:])
+
         if filterEL is not None:
             f = ET.SubElement(filterEL, op)
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext
+            prop.text = classtext.strip()
             literal = ET.SubElement(f, "Literal")
-            literal.text = text
-        # return some values for testing
+            text = text.strip(' "')
+            literal.text = text.strip('"')
+
+            # return some values for testing
         return (classtext, text, op)
 
     def lookup_ogc_expr(self, expr):
@@ -442,8 +520,6 @@ class xml_to_sld(object):
                 # filter
                 classitem = layer.find(QName(ns, 'classItem'))
                 expression = class_.find(QName(ns, 'expression'))
-                if expression is not None:
-                    self.makeFilter(rule, classitem, expression)
                 # scale denoms
                 minscale = layer.find(QName(ns, 'minScaleDenom'))
                 if minscale is not None:
@@ -454,6 +530,17 @@ class xml_to_sld(object):
                     maxs = ET.SubElement(rule, "MaxScaleDenominator")
                     maxs.text = maxscale.text
 
+                if layer_type.upper() == 'RASTER':
+                    symb = ET.SubElement(rule, "RasterSymbolizer")
+                    rule.set("name", layer_name)
+                    name.text = layer_name
+                    self.buildColorMap(layer, symb, ns)
+                    self.layers[layer.attrib['name']] = sld
+                    self.layer_info[layer.attrib['name']] = layer
+                    return
+                if expression is not None:
+                    # we only create multiple filtered rules for vector layers
+                    self.makeFilter(rule, classitem, expression)
                 for style in class_.iterfind(QName(ns, 'Style')):
                     minscale = style.find(QName(ns, 'labelMinScaleDenom'))
                     if minscale is not None:
