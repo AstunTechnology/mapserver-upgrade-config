@@ -504,11 +504,14 @@ class xml_to_sld(object):
             self.symbols[symbol.attrib['name']] = symbol
 
         layerRef = QName(ns, 'Layer')
+        # for each layer in the XML of the MapFile
         for layer in root.iterfind(layerRef):
+            print("Processing ", layer.attrib['name'])
             layer_type = layer.attrib['type']
             layer_name = layer.attrib['name']
             # class_item = layer.find('classItem')
             sld = ET.Element("FeatureTypeStyle")
+            # then for each class create a Rule
             for class_ in layer.iterfind(QName(ns, 'Class')):
                 rule = ET.SubElement(sld, "Rule")
                 name = ET.SubElement(rule, "Name")
@@ -537,7 +540,7 @@ class xml_to_sld(object):
                     self.buildColorMap(layer, symb, ns)
                     self.layers[layer.attrib['name']] = sld
                     self.layer_info[layer.attrib['name']] = layer
-                    return
+                    continue
                 if expression is not None:
                     # we only create multiple filtered rules for vector layers
                     self.makeFilter(rule, classitem, expression)
