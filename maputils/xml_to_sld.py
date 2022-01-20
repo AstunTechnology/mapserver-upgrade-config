@@ -221,7 +221,8 @@ class xml_to_sld(object):
                 return
             else:
                 text = labelitem
-        rule = ET.SubElement(sld, "Rule")
+        if not rule:
+            rule = ET.SubElement(sld, "Rule")
         sText = ET.SubElement(rule, "TextSymbolizer")  # add scaledenoms here
         sLabel = ET.SubElement(sText, "Label")
         sLabel.text = text.text
