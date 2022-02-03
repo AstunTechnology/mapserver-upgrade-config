@@ -211,7 +211,7 @@ class xml_to_sld(object):
         s_rot = style.find('{http://www.mapserver.org/mapserver}angle')
         if s_rot is not None:
             rotation = ET.SubElement(graphic, "Rotation")
-            rotation.text = s_rot.text
+            rotation.text = s_rot.text.strip("[] ")
 
     def getLabel(self, layer, sld, rule, label):
         labelitem = layer.find('{http://www.mapserver.org/mapserver}labelItem')
@@ -221,11 +221,11 @@ class xml_to_sld(object):
                 return
             else:
                 text = labelitem
-        if not rule:
+        if rule is None:
             rule = ET.SubElement(sld, "Rule")
         sText = ET.SubElement(rule, "TextSymbolizer")  # add scaledenoms here
         sLabel = ET.SubElement(sText, "Label")
-        sLabel.text = text.text
+        sLabel.text = text.text.strip("[] ")
         font = label.find('{http://www.mapserver.org/mapserver}font')
         if font is not None:
             sFont = ET.SubElement(sText, "Font")
@@ -347,7 +347,8 @@ class xml_to_sld(object):
         else:
             f = ET.SubElement(filterEL, "PropertyIsEqualTo")
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext
+            if classtext:
+                prop.text = classtext.strip('][ ')
             literal = ET.SubElement(f, "Literal")
             literal.text = exprText
         return filterEL
@@ -401,7 +402,8 @@ class xml_to_sld(object):
             else:
                 f = ET.SubElement(filterOr, "PropertyIsEqualTo")
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext
+            if classtext:
+                prop.text = classtext.strip("[] ")
             literal = ET.SubElement(f, "Literal")
             literal.text = exp.strip()
         return filterOr
@@ -415,7 +417,8 @@ class xml_to_sld(object):
         exprText = exprText.replace('/', '')
         exprText = exprText.replace("^", "").replace("$", "")
         prop = ET.SubElement(f, "PropertyName")
-        prop.text = classtext
+        if classtext:
+            prop.text = classtext.strip("[] ")
         literal = ET.SubElement(f, "Literal")
         literal.text = exprText
 
@@ -436,7 +439,8 @@ class xml_to_sld(object):
             f.attrib['matchCase'] = 'true'
             exprText = exprText[index+1:]
         prop = ET.SubElement(f, "PropertyName")
-        prop.text = classtext.strip()
+        if classtext:
+            prop.text = classtext.strip("[] ")
         literal = ET.SubElement(f, "Literal")
         literal.text = exprText.strip()
 
@@ -453,7 +457,8 @@ class xml_to_sld(object):
         if filterEL is not None:
             f = ET.SubElement(filterEL, op)
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext.strip()
+            if classtext:
+                prop.text = classtext.strip("[] ")
             literal = ET.SubElement(f, "Literal")
             text = text.strip(' "')
             literal.text = text.strip('"')
@@ -507,81 +512,80 @@ class xml_to_sld(object):
         layerRef = QName(ns, 'Layer')
         # for each layer in the XML of the MapFile
         for layer in root.iterfind(layerRef):
-            print("Processing ", layer.attrib['name'])
-            layer_type = layer.attrib['type']
-            layer_name = layer.attrib['name']
-            # class_item = layer.find('classItem')
-            sld = ET.Element("FeatureTypeStyle")
-            # then for each class create a Rule
-            for class_ in layer.iterfind(QName(ns, 'Class')):
-                rule = ET.SubElement(sld, "Rule")
-                name = ET.SubElement(rule, "Name")
-                if 'name' in class_.attrib and not class_.attrib['name'] == '':
-                    rule.set("name", class_.attrib['name'])
-                    name.text = class_.attrib['name']
-                if name.text is None:
-                    name.text = "."
-                # filter
-                classitem = layer.find(QName(ns, 'classItem'))
-                expression = class_.find(QName(ns, 'expression'))
-                # scale denoms
-                minscale = layer.find(QName(ns, 'minScaleDenom'))
+            self.process_layer(layer, ns)
+
+    def process_layer(self, layer, ns):
+        print("Processing ", layer.attrib['name'])
+        layer_type = layer.attrib['type']
+        layer_name = layer.attrib['name']
+        # class_item = layer.find('classItem')
+        sld = ET.Element("FeatureTypeStyle")
+        # then for each class create a Rule
+        for class_ in layer.iterfind(QName(ns, 'Class')):
+            rule = ET.SubElement(sld, "Rule")
+            name = ET.SubElement(rule, "Name")
+            if 'name' in class_.attrib and not class_.attrib['name'] == '':
+                # rule.set("name", class_.attrib['name'])
+                name.text = class_.attrib['name']
+            if name.text is None:
+                name.text = "."
+            # filter
+            classitem = layer.find(QName(ns, 'classItem'))
+            expression = class_.find(QName(ns, 'expression'))
+            # scale denoms
+            minscale = class_.find(QName(ns, 'minScaleDenom'))
+            if minscale is not None:
+                mins = ET.SubElement(rule, "MinScaleDenominator")
+                mins.text = minscale.text
+            maxscale = class_.find(QName(ns, 'maxScaleDenom'))
+            if maxscale is not None:
+                maxs = ET.SubElement(rule, "MaxScaleDenominator")
+                maxs.text = maxscale.text
+
+            if layer_type.upper() == 'RASTER':
+                # RASTER layers remain as classic
+                print(f"Skipping {layer_name} as it is a RASTER layer")
+                return
+            if expression is not None:
+                # we only create multiple filtered rules for vector layers
+                self.makeFilter(rule, classitem, expression)
+            for style in class_.iterfind(QName(ns, 'Style')):
+                minscale = style.find(QName(ns, 'labelMinScaleDenom'))
                 if minscale is not None:
                     mins = ET.SubElement(rule, "MinScaleDenominator")
                     mins.text = minscale.text
-                maxscale = layer.find(QName(ns, 'maxScaleDenom'))
+                maxscale = style.find(QName(ns, 'labelMaxScaleDenom'))
                 if maxscale is not None:
                     maxs = ET.SubElement(rule, "MaxScaleDenominator")
                     maxs.text = maxscale.text
 
-                if layer_type.upper() == 'RASTER':
-                    symb = ET.SubElement(rule, "RasterSymbolizer")
-                    rule.set("name", layer_name)
-                    name.text = layer_name
-                    self.buildColorMap(layer, symb, ns)
-                    self.layers[layer.attrib['name']] = sld
-                    self.layer_info[layer.attrib['name']] = layer
-                    continue
-                if expression is not None:
-                    # we only create multiple filtered rules for vector layers
-                    self.makeFilter(rule, classitem, expression)
-                for style in class_.iterfind(QName(ns, 'Style')):
-                    minscale = style.find(QName(ns, 'labelMinScaleDenom'))
-                    if minscale is not None:
-                        mins = ET.SubElement(rule, "MinScaleDenominator")
-                        mins.text = minscale.text
-                    maxscale = style.find(QName(ns, 'labelMaxScaleDenom'))
-                    if maxscale is not None:
-                        maxs = ET.SubElement(rule, "MaxScaleDenominator")
-                        maxs.text = maxscale.text
+                if layer_type.upper() == 'LINE':
+                    symb = ET.SubElement(rule, "LineSymbolizer")
+                    self.getStroke(style, symb, isLine=True)
 
-                    if layer_type.upper() == 'LINE':
-                        symb = ET.SubElement(rule, "LineSymbolizer")
-                        self.getStroke(style, symb, isLine=True)
+                elif layer_type.upper() == 'POLYGON':
+                    symb = ET.SubElement(rule, "PolygonSymbolizer")
+                    self.getFill(style, symb)
+                    self.getStroke(style, symb)
+                elif layer_type.upper() == 'POINT':
+                    symb = ET.SubElement(rule, "PointSymbolizer")
+                    self.getGraphic(style, symb)
+                else:
+                    print("Unknown layer type "+str(layer_type) +
+                          " for "+str(layer_name))
 
-                    elif layer_type.upper() == 'POLYGON':
-                        symb = ET.SubElement(rule, "PolygonSymbolizer")
-                        self.getFill(style, symb)
-                        self.getStroke(style, symb)
-                    elif layer_type.upper() == 'POINT':
-                        symb = ET.SubElement(rule, "PointSymbolizer")
-                        self.getGraphic(style, symb)
-                    else:
-                        print("Unknown layer type "+str(layer_type) +
-                              " for "+str(layer_name))
-
-                for label in class_.iterfind(QName(ns, 'Label')):
-                    minscale = layer.find(QName(ns, 'labelMinScaleDenom'))
-                    if minscale is not None:
-                        mins = ET.SubElement(rule, "MinScaleDenominator")
-                        mins.text = minscale.text
-                    maxscale = layer.find(QName(ns, 'labelMaxScaleDenom'))
-                    if maxscale is not None:
-                        maxs = ET.SubElement(rule, "MaxScaleDenominator")
-                        maxs.text = maxscale.text
-                    self.getLabel(layer, sld, rule, label)
-            self.layers[layer.attrib['name']] = sld
-            self.layer_info[layer.attrib['name']] = layer
+            for label in class_.iterfind(QName(ns, 'Label')):
+                minscale = layer.find(QName(ns, 'labelMinScaleDenom'))
+                if minscale is not None:
+                    mins = ET.SubElement(rule, "MinScaleDenominator")
+                    mins.text = minscale.text
+                maxscale = layer.find(QName(ns, 'labelMaxScaleDenom'))
+                if maxscale is not None:
+                    maxs = ET.SubElement(rule, "MaxScaleDenominator")
+                    maxs.text = maxscale.text
+                self.getLabel(layer, sld, rule, label)
+        self.layers[layer.attrib['name']] = sld
+        self.layer_info[layer.attrib['name']] = layer
 
     def getLayer(self, name):
         if name in self.layers:

@@ -197,8 +197,8 @@ class map_to_xml(object):
                             elif k == 'styles':
                                 st = s['styles']
 
+                                stEl = etree.SubElement(class_, "Style")
                                 for sty in st:
-                                    stEl = etree.SubElement(class_, "Style")
                                     for key in sty.keys():
                                         self.makeSubElement(stEl, sty, key)
                                     stEl = self.sortChildren(stEl, stEl)
@@ -334,8 +334,8 @@ class map_to_xml(object):
             # parser = mappyfile.parser.Parser()
             self.root = etree.Element("Map",
                                       nsmap={
-                                         None:
-                                         "http://www.mapserver.org/mapserver"},
+                                          None:
+                                          "http://www.mapserver.org/mapserver"},
                                       name=input_file, version="5.6")
             # map_ = parser.parse_file(input_file)
 
@@ -348,8 +348,8 @@ class map_to_xml(object):
                                          expand_includes=expand_includes)
             self.root = etree.Element("Map",
                                       nsmap={
-                                         None:
-                                         "http://www.mapserver.org/mapserver"},
+                                          None:
+                                          "http://www.mapserver.org/mapserver"},
                                       version="5.6")
 
         self.parse(mapp)
