@@ -196,7 +196,10 @@ class xml_to_sld(object):
                 # then it is a WKname
                 mark = ET.SubElement(graphic, "Mark")
                 wkn = ET.SubElement(mark, "WellKnownName")
-                wkn.text = symbol.text
+                if (symbol.text == 'HATCH'):
+                    wkn.text = '/line'
+                else:
+                    wkn.text = symbol.text
                 self.getFill(style, mark, in_graphic=True)
                 self.getStroke(style, mark, in_graphic=True)
 
