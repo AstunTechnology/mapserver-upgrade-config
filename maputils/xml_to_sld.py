@@ -5,6 +5,7 @@ Created on 8 Feb 2017
 '''
 
 import argparse
+import logging
 from lxml.etree import QName
 # import dicttoxml
 # from xml.dom.minidom import parseString
@@ -76,7 +77,6 @@ class xml_to_sld(object):
                                         name="stroke-linejoin")
             stroke_join.text = line_join.text
         line_dash = style.find('{http://www.mapserver.org/mapserver}pattern')
-        # print("line_dash", line_dash)
         if line_dash is None:
             line_dash = style.find('{http://www.mapserver.org/mapserver}gap')
         if line_dash is not None:
@@ -388,7 +388,6 @@ class xml_to_sld(object):
 
     def process_list(self, classtext, exprText, filterEL):
         filterOr = ET.SubElement(filterEL, "Or")
-        # print(exprText)
         exprText = exprText.strip(" {}()")
         if ' IN ' in exprText:
             parts = exprText.split("IN")
@@ -518,7 +517,7 @@ class xml_to_sld(object):
             self.process_layer(layer, ns)
 
     def process_layer(self, layer, ns):
-        print("Processing ", layer.attrib['name'])
+        logging.debug(f"Processing {layer.attrib['name']}")
         layer_type = layer.attrib['type']
         layer_name = layer.attrib['name']
         # class_item = layer.find('classItem')
@@ -547,7 +546,7 @@ class xml_to_sld(object):
 
             if layer_type.upper() == 'RASTER':
                 # RASTER layers remain as classic
-                print(f"Skipping {layer_name} as it is a RASTER layer")
+                logging.warn(f"Skipping {layer_name} as it is a RASTER layer")
                 return
             if expression is not None:
                 # we only create multiple filtered rules for vector layers
@@ -574,8 +573,7 @@ class xml_to_sld(object):
                     symb = ET.SubElement(rule, "PointSymbolizer")
                     self.getGraphic(style, symb)
                 else:
-                    print("Unknown layer type "+str(layer_type) +
-                          " for "+str(layer_name))
+                    logging.warn(f"Unknown layer type {layer_type} for {layer_name}")
 
             for label in class_.iterfind(QName(ns, 'Label')):
                 minscale = layer.find(QName(ns, 'labelMinScaleDenom'))
@@ -608,7 +606,7 @@ def main():
     sldStore = xml_to_sld(args.inputfile)
 
     for layer in sldStore.layers:
-        print(layer)
+        logging.debug(f"{layer}")
         ET.dump(sldStore.getLayer(layer))
 
 
