@@ -18,6 +18,7 @@ from lxml.etree import CDATA
 # from xml.sax.saxutils import escape
 from operator import attrgetter
 import operator
+import logging
 
 
 class map_to_xml(object):
@@ -114,6 +115,7 @@ class map_to_xml(object):
     def makeSubElement(self, root, elements, key, upper=False):
         if "__type__" == key:
             return None
+        logging.debug(f"processing key: {key}")
         if key in self.keyCases:
             keyx = self.keyCases[key]
         else:
@@ -362,7 +364,9 @@ class map_to_xml(object):
 
     def parse(self, mapp):
         root = self.getroot()
-        for mapkey in mapp.keys():
+        mapp = mapp[0]
+        for mapkey in mapp:
+            logging.debug(f"got map key: {mapkey}")
             if "include" == mapkey:
                 # import the file?
                 pass
