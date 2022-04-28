@@ -1,0 +1,6 @@
+dist/*
+mapfiles/*
+build/*
+lib/*
+lib64/*
+share/*
