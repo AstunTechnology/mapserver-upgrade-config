@@ -364,7 +364,8 @@ class map_to_xml(object):
 
     def parse(self, mapp):
         root = self.getroot()
-        mapp = mapp[0]
+        # logging.debug(f"got {mapp}")
+        # mapp = mapp[0]
         for mapkey in mapp:
             logging.debug(f"got map key: {mapkey}")
             if "include" == mapkey:
