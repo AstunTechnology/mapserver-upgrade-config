@@ -3,6 +3,7 @@ import lxml.etree as ET
 # from lxml.etree import QName
 import os
 import warnings
+import logging
 from maputils import map_to_xml
 from maputils import xml_to_sld
 
@@ -19,6 +20,7 @@ def ignore_warnings(test_func):
 class Test_update_mapsource(unittest.TestCase):
 
     THIS_DIR = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
+    logging.basicConfig(level=logging.DEBUG)
 
     def setUp(self):
         self.data_path = os.path.normpath(
@@ -94,6 +96,74 @@ class Test_update_mapsource(unittest.TestCase):
         for css in sldStore.getLayer(layer).iter("CssParameter"):
             good = good or css.attrib['name'] == 'stroke-opacity'
         self.assertTrue(good)
+
+    @ignore_warnings
+    def test_legend(self):
+        """make sure fix for issue #11 works"""
+        instr = """MAP
+                    LEGEND
+                        IMAGECOLOR 255 255 255
+                        KEYSIZE 20 10
+                        KEYSPACING 5 5
+                        LABEL
+                            SIZE MEDIUM
+                            TYPE BITMAP
+                            BUFFER 0
+                            COLOR 0 0 0
+                            FORCE FALSE
+                            MINDISTANCE -1
+                            MINFEATURESIZE -1
+                            OFFSET 0 0
+                            PARTIALS TRUE
+                        END
+                        POSITION LL
+                        STATUS OFF
+                    END
+                    QUERYMAP
+                        COLOR 255 255 0
+                        SIZE -1 -1
+                        STATUS OFF
+                        STYLE HILITE
+                    END
+
+                    SCALEBAR
+                        COLOR 0 0 0
+                        IMAGECOLOR 255 255 255
+                        INTERVALS 4
+                        LABEL
+                        SIZE MEDIUM
+                        TYPE BITMAP
+                        BUFFER 0
+                        COLOR 0 0 0
+                        FORCE FALSE
+                        MINDISTANCE -1
+                        MINFEATURESIZE -1
+                        OFFSET 0 0
+                        PARTIALS TRUE
+                        END
+                        POSITION LL
+                        SIZE 200 3
+                        STATUS OFF
+                        STYLE 0
+                        UNITS MILES
+                    END
+                END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        # print(ET.tostring(root, pretty_print=True))
+        self.assertTrue(root is not None)
+        legend = root.find(".//Legend")
+        self.assertTrue(legend)
+        labels = legend.find("Label")
+        self.assertTrue(labels)
+        qMap = root.find(".//QueryMap")
+        self.assertTrue(qMap)
+        color = qMap.find("color")
+        self.assertTrue(color is not None)
+        scale = root.find(".//ScaleBar")
+        self.assertTrue(scale)
+        labels = scale.find("Label")
+        self.assertTrue(labels)
 
     @ignore_warnings
     def test_raster(self):

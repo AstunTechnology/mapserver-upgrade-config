@@ -122,6 +122,7 @@ class map_to_xml(object):
             keyx = key
         el = etree.SubElement(root, keyx)
 
+        # logging.debug(f"elements = {elements}")
         element = elements[key]
         #  if isinstance(element, plyplus.common.TokValue):
         #      el.text = escape(element).replace("'", "").replace('"', "")
@@ -149,19 +150,20 @@ class map_to_xml(object):
 
     def makeLegend(self, root, mapp, mapkey):
         legend = etree.SubElement(root, "Legend")
-        for leg in mapp[mapkey]:
-            for k in leg.keys():
-                if "labels" == k:
-                    self.makeLabels(leg, legend, k)
-                elif 'status' == k:
-                    legend.set("status", leg[k].upper())
-                else:
-                    self.makeSubElement(legend, leg, k)
+        for k in mapp[mapkey]:
+            logging.debug(f"got legend key {k}")
+            if "labels" == k:
+                self.makeLabels(k, legend, mapp[mapkey][k])
+            elif 'status' == k:
+                legend.set("status", mapp[mapkey][k].upper())
+            else:
+                self.makeSubElement(legend, mapp[mapkey], k)
         legend = self.sortChildren(legend, legend)
 
     def makeLabels(self, s, class_, k):
-        for kx in s[k]:
-            labels = etree.SubElement(class_, "Label")
+        logging.debug(f"Making Labels: {s}, {class_}, {k}")
+        labels = etree.SubElement(class_, "Label")
+        for kx in k:
             for ky in kx:
                 if 'type' == ky:
                     labels.set("type", kx[ky].upper())
@@ -189,10 +191,12 @@ class map_to_xml(object):
                 elif "type" == key:
                     layer.set("type", l[key])
                 elif "classes" == key:
+                    logging.debug(f"processing classes")
 
                     for s in l[key]:
                         class_ = etree.SubElement(layer, "Class")
                         for k in s.keys():
+                            logging.debug(f"got object {s[k]} for key {k}")
                             if k == 'name' or k == 'status':
                                 class_.set(k, s[k].replace('"', '')
                                            .replace("'", ""))
@@ -205,7 +209,7 @@ class map_to_xml(object):
                                         self.makeSubElement(stEl, sty, key)
                                     stEl = self.sortChildren(stEl, stEl)
                             elif "labels" == k:
-                                kx = self.makeLabels(s, class_, k)
+                                self.makeLabels(k, class_, s[k])
                             else:
                                 self.makeSubElement(class_, s, k)
                         class_ = self.sortChildren(class_, class_)
@@ -236,12 +240,11 @@ class map_to_xml(object):
 
     def makeQueryMaps(self, root, mapp, mapkey):
         qmap = etree.SubElement(root, "QueryMap")
-        for leg in mapp[mapkey]:
-            for k in leg.keys():
-                if 'status' == k:
-                    qmap.set(k, leg[k])
-                else:
-                    self.makeSubElement(qmap, leg, k)
+        for k in mapp[mapkey]:
+            if 'status' == k:
+                qmap.set("status", mapp[mapkey][k])
+            else:
+                self.makeSubElement(qmap, mapp[mapkey], k)
 
     def makeWebs(self, root, mapp, mapkey):
         webs = etree.SubElement(root, "Web")
@@ -278,14 +281,14 @@ class map_to_xml(object):
 
     def makeScalebars(self, root, mapp, mapkey):
         scalebars = etree.SubElement(root, "ScaleBar")
-        for leg in mapp[mapkey]:
-            for k in leg.keys():
-                if 'labels' == k:
-                    self.makeLabels(leg, scalebars, k)
-                elif 'status' == k:
-                    scalebars.set(k, leg[k])
-                else:
-                    self.makeSubElement(scalebars, leg, k)
+        for k in mapp[mapkey]:
+            logging.debug(f"Processing scalebar: {k}, ({mapkey})")
+            if 'labels' == k:
+                self.makeLabels(k, scalebars, mapp[mapkey][k])
+            elif 'status' == k:
+                scalebars.set('status', k)
+            else:
+                self.makeSubElement(scalebars, mapp[mapkey], k)
         scalebars = self.sortChildren(scalebars, scalebars)
 
     def makeConfig(self, root, mapp, mapkey):
@@ -371,11 +374,11 @@ class map_to_xml(object):
             if "include" == mapkey:
                 # import the file?
                 pass
-            elif "legends" == mapkey:
+            elif "legend" == mapkey:
                 self.makeLegend(root, mapp, mapkey)
             elif mapkey == 'layers':
                 self.makeLayers(root, mapp, mapkey)
-            elif mapkey == 'querymaps':
+            elif mapkey == 'querymap':
                 self.makeQueryMaps(root, mapp, mapkey)
             elif mapkey == 'web':
                 self.makeWebs(root, mapp, mapkey)
@@ -383,7 +386,7 @@ class map_to_xml(object):
                 self.makeOutputFormats(root, mapp, mapkey)
             elif mapkey == 'projections':
                 self.makeProjections(root, mapp, mapkey)
-            elif mapkey == 'scalebars':
+            elif mapkey == 'scalebar':
                 self.makeScalebars(root, mapp, mapkey)
             elif mapkey == 'config':
                 self.makeConfig(root, mapp, mapkey)
@@ -435,9 +438,12 @@ def main():
                         help="the file to write output to (stdout if missing)",
                         default="")
 
+    parser.add_argument("-d", "--debug", help="turn on debugging", default=False, action="store_true")
     args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
-    print("Processing {}".format(args.inputfile))
+    logging.info("Processing {}".format(args.inputfile))
 
     mapper = map_to_xml(args.inputfile,  output_file=args.outputfile)
     mapper.print_map()
