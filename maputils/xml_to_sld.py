@@ -39,10 +39,14 @@ class xml_to_sld(object):
         return "#" + "".join("{:02X}".format(int(a)) for a in colors)
 
     def getStroke(self, style, symbol, isLine=False, in_graphic=False):
+
+        logging.debug(ET.tostring(symbol))
         if not in_graphic:
             self.getGraphic(style, symbol, in_graphic=True)
             if symbol.find("./Graphic") is not None:
+                logging.debug(f"No graphic found returning {symbol}")
                 return
+
         color = style.find('{http://www.mapserver.org/mapserver}outlineColor')
         if isLine:
             color = style.find('{http://www.mapserver.org/mapserver}color')
@@ -62,6 +66,8 @@ class xml_to_sld(object):
         width = style.find('{http://www.mapserver.org/mapserver}outlineWidth')
         if width is None:
             width = style.find('{http://www.mapserver.org/mapserver}width')
+        if width is None:
+            width = style.find('{http://www.mapserver.org/mapserver}size')
         if width is not None:
             stroke_width = ET.SubElement(stroke, "CssParameter",
                                          name="stroke-width")
@@ -82,7 +88,7 @@ class xml_to_sld(object):
         if line_dash is not None:
             stroke_dash = ET.SubElement(stroke, "CssParameter",
                                         name="stroke-dasharray")
-            stroke_dash.text = line_dash.text
+            stroke_dash.text = line_dash.text.strip('()')
         line_gap = style.find('{http://www.mapserver.org/mapserver}initialGap')
         if line_gap is not None:
             stroke_offset = ET.SubElement(stroke, "CssParameter",

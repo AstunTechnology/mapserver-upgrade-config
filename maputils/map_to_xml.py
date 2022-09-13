@@ -196,17 +196,17 @@ class map_to_xml(object):
                     for s in l[key]:
                         class_ = etree.SubElement(layer, "Class")
                         for k in s.keys():
-                            logging.debug(f"got object {s[k]} for key {k}")
+                            # logging.debug(f"got object {s[k]} for key {k}")
                             if k == 'name' or k == 'status':
                                 class_.set(k, s[k].replace('"', '')
                                            .replace("'", ""))
                             elif k == 'styles':
                                 st = s['styles']
+                                logging.debug(f"Processing a style: {st}")
 
                                 stEl = etree.SubElement(class_, "Style")
                                 for sty in st:
-                                    for key in sty.keys():
-                                        self.makeSubElement(stEl, sty, key)
+                                    self.makeStyle(stEl, sty)
                                     stEl = self.sortChildren(stEl, stEl)
                             elif "labels" == k:
                                 self.makeLabels(k, class_, s[k])
@@ -237,6 +237,16 @@ class map_to_xml(object):
                 else:
                     self.makeSubElement(layer, l, key)
             layer = self.sortChildren(layer, layer)
+
+    def makeStyle(self, element, style):
+        for key in style.keys():
+            logging.debug(f"processing style {key}")
+            if key == 'symbol' and style[key] == 'dashed':
+                # dashed lines are probably not a graphic symbol
+                logging.debug("skipping dashed")
+                continue
+            self.makeSubElement(element, style, key)
+        element = self.sortChildren(element, element)
 
     def makeQueryMaps(self, root, mapp, mapkey):
         qmap = etree.SubElement(root, "QueryMap")
@@ -301,6 +311,7 @@ class map_to_xml(object):
             item.text = mapp[mapkey][k]
 
     def makeSymbols(self, root, mapp, mapkey):
+        logging.debug(f"Processing Symbol: ")
         for k in mapp[mapkey]:
             el = etree.SubElement(root, "Symbol")
             for d in k:
