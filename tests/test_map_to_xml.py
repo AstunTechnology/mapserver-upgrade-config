@@ -6,6 +6,7 @@ import warnings
 import logging
 from maputils import map_to_xml
 from maputils import xml_to_sld
+from xmldiff import main
 
 
 def ignore_warnings(test_func):
@@ -164,6 +165,66 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertTrue(scale)
         labels = scale.find("Label")
         self.assertTrue(labels)
+
+    @ignore_warnings
+    def test_graphic_stroke(self):
+        instr = """MAP
+            LAYER
+                NAME "prow"
+                TYPE LINE
+                STATUS OFF
+                CLASS
+                NAME "Metro"
+                #           EXPRESSION  ("[tag]"  = "METR" )
+                EXPRESSION ("[tag]"  = "METR" )
+                STYLE
+                    COLOR 222 134 0
+                    WIDTH 2
+                END
+                STYLE
+                    SYMBOL "|line"
+                    COLOR 222 134 0
+                    WIDTH 2
+                    SIZE 6
+                    GAP -4
+                    END
+                END
+            END
+        END
+        """
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        # ET.dump(root)
+        self.assertEquals(2, len(root.findall(".//Style")))
+        # print("------------------------------------------")
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # print("layer", layer)
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(layer is not None)
+            style = sldStore.getLayer(layer)
+            self.assertEqual(2, len(style.findall(".//LineSymbolizer")))
+            symbolizer = style.findall(".//LineSymbolizer")[1]
+            # ET.dump(symbolizer)
+            self.assertTrue(symbolizer.find("./Stroke/CssParameter[@name='stroke-dasharray']") is not None)
+            exp_tree = ET.parse(f"{self.THIS_DIR}/mapfiles/expected.sld")
+            diff = main.diff_trees(exp_tree, symbolizer)
+            self.assertTrue(0 == len(diff))
+
+    @ignore_warnings
+    def test_dashes(self):
+        sym_file = ('%s/dashes.map' % self.data_path)
+        sldStore = self.read_map_file(sym_file)
+        layer = 'prow'
+        # ET.dump(sldStore.getLayer(layer))
+        style = sldStore.getLayer(layer)
+        # ET.dump(style)
+        self.assertEqual(3, len(style.findall(".//CssParameter[@name='stroke-dasharray']")))
+        sym_file = ('%s/dashes_2.map' % self.data_path)
+        sldStore = self.read_map_file(sym_file)
+        layer = 'prow'
+        # ET.dump(sldStore.getLayer(layer))
+        style = sldStore.getLayer(layer)
 
     @ignore_warnings
     def test_raster(self):

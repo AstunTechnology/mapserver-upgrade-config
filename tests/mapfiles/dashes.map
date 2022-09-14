@@ -1,0 +1,110 @@
+MAP
+	LAYER
+		NAME "prow"
+		TYPE LINE
+		STATUS OFF
+		CLASS
+			NAME "Footpath"
+			EXPRESSION "Footpath"
+			LABEL
+				TYPE TRUETYPE
+				ANGLE AUTO
+				COLOR 255 128 0
+
+				FONT verdana
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 1
+				SIZE 6
+				MAXSCALEDENOM 15000
+			END
+			STYLE
+				COLOR 255 128 0
+				PATTERN 5 5 END
+				SIZE 5
+				SYMBOL dashed
+			END
+
+		END
+		CLASS
+			NAME "Bridleway"
+			EXPRESSION "Bridleway"
+			LABEL
+				TYPE TRUETYPE
+				ANGLE AUTO
+				COLOR 0 0 255
+
+				FONT verdana
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 1
+				SIZE 6
+				MAXSCALEDENOM 15000
+			END
+			STYLE
+				COLOR 0 0 160
+				PATTERN 5 5 END
+				SIZE 5
+				SYMBOL dashed
+			END
+
+		END
+		CLASS
+			NAME "Byway Open to All Traffic"
+			EXPRESSION "Byway Open to All Traffic"
+			LABEL
+				TYPE TRUETYPE
+				ANGLE AUTO
+				COLOR 255 0 0
+
+				FONT verdana
+				OUTLINECOLOR 255 255 255
+				OUTLINEWIDTH 1
+				SIZE 6
+				MAXSCALEDENOM 15000
+			END
+			STYLE
+				COLOR 255 0 0
+				PATTERN 5 5 END
+				SIZE 5
+				SYMBOL dashed
+			END
+
+		END
+		CLASSITEM "english_type"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry FROM (select * FROM roads_travel.prow) AS foo USING UNIQUE ogc_fid USING SRID=27700"
+
+		LABELITEM "routecode"
+		METADATA
+			 "qstring_validation_pattern" ""
+			 "__type__" "metadata"
+		END
+		UNITS METERS
+	END
+
+	LAYER
+		NAME "RegionalCycleRoutes"
+		TYPE LINE
+		STATUS OFF
+		CLASS
+			NAME "(c) Sustrans"
+
+			STYLE
+				COLOR 255 128 255
+				OPACITY 100
+				OUTLINECOLOR 255 128 255
+
+				WIDTH 3
+			END
+
+		END
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry FROM (select * FROM corporate.tra_sustrands_regional_route) AS foo USING UNIQUE ogc_fid USING SRID=27700"
+
+		METADATA
+			 "qstring_validation_pattern" ""
+			 "__type__" "metadata"
+		END
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		UNITS METERS
+	END
+END

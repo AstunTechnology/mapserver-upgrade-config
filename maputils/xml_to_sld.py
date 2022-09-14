@@ -29,7 +29,13 @@ class XQName(QName):
 class xml_to_sld(object):
 
     def set_color(self, target, color):
-        target.text = self.getColor(color)
+        if isinstance(color, ET._Element):
+            target.text = self.getColor(color)
+        elif isinstance(color, str):
+            target.text = color
+        else:
+            logging.debug(f"bad color in set_color {color} ({type(color)})")
+            target.text = '#000000'
 
     def getColor(self, color):
         colors = []
@@ -40,60 +46,75 @@ class xml_to_sld(object):
 
     def getStroke(self, style, symbol, isLine=False, in_graphic=False):
 
-        logging.debug(ET.tostring(symbol))
+        logging.debug(f"in getStroke: {ET.tostring(style)} in_graphic? {in_graphic}")
+
+        stroke = ET.SubElement(symbol, "Stroke")
         if not in_graphic:
-            self.getGraphic(style, symbol, in_graphic=True)
-            if symbol.find("./Graphic") is not None:
-                logging.debug(f"No graphic found returning {symbol}")
+            logging.debug(f"looking for Graphic in {ET.tostring(style)}")
+            if style.find(".//{http://www.mapserver.org/mapserver}Graphic") is not None:
+                logging.debug("found a graphic")
+                if isLine:
+                    # add GraphicStroke element
+                    graphic = ET.SubElement(stroke, "GraphicStroke")
+                self.getGraphic(style, graphic, in_graphic=True, isLine=isLine)
                 return
-
-        color = style.find('{http://www.mapserver.org/mapserver}outlineColor')
+        color = style.find('.//{http://www.mapserver.org/mapserver}outlineColor')
+        logging.debug(f"color = {color}")
         if isLine:
-            color = style.find('{http://www.mapserver.org/mapserver}color')
+            color = style.find('.//{http://www.mapserver.org/mapserver}color')
+            logging.debug(f"outlinecolor = {color}")
         if color is None:
-            # nothing doing here
-            return
-        else:
-            stroke = ET.SubElement(symbol, "Stroke")
-            stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")
-            self.set_color(stroke_color, color)
+            color = '#000000'
+        stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")
+        self.set_color(stroke_color, color)
 
-        opacity = style.find('{http://www.mapserver.org/mapserver}opacity')
+        opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
         if opacity is not None:
             fill_opacity = ET.SubElement(stroke, "CssParameter",
                                          name="stroke-opacity")
             fill_opacity.text = str(float(opacity.text)/100.0)
-        width = style.find('{http://www.mapserver.org/mapserver}outlineWidth')
+        width = style.find('.//{http://www.mapserver.org/mapserver}outlineWidth')
         if width is None:
-            width = style.find('{http://www.mapserver.org/mapserver}width')
+            width = style.find('.//{http://www.mapserver.org/mapserver}width')
+        size = style.find('.//{http://www.mapserver.org/mapserver}size')
         if width is None:
-            width = style.find('{http://www.mapserver.org/mapserver}size')
+            width = size
+        if size is not None:
+            size = int(size.text)
+        else:
+            size = 0
         if width is not None:
             stroke_width = ET.SubElement(stroke, "CssParameter",
                                          name="stroke-width")
             stroke_width.text = width.text
-        line_cap = style.find('{http://www.mapserver.org/mapserver}lineCap')
+        line_cap = style.find('.//{http://www.mapserver.org/mapserver}lineCap')
         if line_cap is not None:
             stroke_cap = ET.SubElement(stroke, "CssParameter",
                                        name="stroke-linecap")
             stroke_cap.text = line_cap.text
-        line_join = style.find('{http://www.mapserver.org/mapserver}lineJoin')
+        line_join = style.find('.//{http://www.mapserver.org/mapserver}lineJoin')
         if line_join is not None:
             stroke_join = ET.SubElement(stroke, "CssParameter",
                                         name="stroke-linejoin")
             stroke_join.text = line_join.text
-        line_dash = style.find('{http://www.mapserver.org/mapserver}pattern')
+        line_dash = style.find('.//{http://www.mapserver.org/mapserver}pattern')
         if line_dash is None:
-            line_dash = style.find('{http://www.mapserver.org/mapserver}gap')
+            line_dash = style.find('.//{http://www.mapserver.org/mapserver}gap')
         if line_dash is not None:
             stroke_dash = ET.SubElement(stroke, "CssParameter",
                                         name="stroke-dasharray")
-            stroke_dash.text = line_dash.text.strip('()')
-        line_gap = style.find('{http://www.mapserver.org/mapserver}initialGap')
+            pattern = line_dash.text.strip('()')
+            if int(pattern) < 0:
+                # this should have size added to one or both values I think
+                pattern = str(size)+" "+str(abs(int(pattern))+size)
+            stroke_dash.text = pattern
+            logging.debug(f"line_dash (stroke_dash) -> {ET.tostring(line_dash)}")
+        line_gap = style.find('.//{http://www.mapserver.org/mapserver}initialGap')
         if line_gap is not None:
             stroke_offset = ET.SubElement(stroke, "CssParameter",
                                           name="stroke-dashoffset")
             stroke_offset.text = line_gap.text
+            logging.debug(f"stroke_offset (gap) -> {ET.tostring(stroke_offset)}")
         # ET.dump(stroke)
 
     def getFill(self, style, symb, in_graphic=False):
@@ -169,10 +190,12 @@ class xml_to_sld(object):
 
         return True
 
-    def getGraphic(self, style, symb, in_graphic=False):
-        if symb.find("./Graphic") is not None:
+    def getGraphic(self, style, symb, in_graphic=False, isLine=False):
+        logging.debug(f"processing graphic in {ET.tostring(style)}")
+        if style.find("./Graphic") is not None:
             return
-        symbol = style.find('{http://www.mapserver.org/mapserver}symbol')
+        symbol = style.find('.//{http://www.mapserver.org/mapserver}symbol')
+        logging.debug(f"symbol = {symbol}")
         if symbol is None:
             return
         graphic = ET.SubElement(symb, "Graphic")
@@ -183,23 +206,26 @@ class xml_to_sld(object):
         elif self.isFile(symbol.text) or self.isURL(symbol.text):
             self.buildGraphic(symbol, graphic, symbol.text)
         else:  # its text
+            logging.debug(f"Handling symbol {symbol} in graphic")
             if symbol.text in self.symbols:
                 s = self.symbols[symbol.text]
                 if s.attrib['type'].upper() == 'pixmap'.upper():
                     self.buildGraphic(s,
                                       graphic,
                                       s.find(
-                                          '{http://www.mapserver' +
+                                          './/{http://www.mapserver' +
                                           '.org/mapserver}image').text)
                 else:
                     # then it is a WKname
+                    logging.debug(f"got a wellknownname in a mark")
                     mark = ET.SubElement(graphic, "Mark")
                     wkn = ET.SubElement(mark, "WellKnownName")
                     wkn.text = symbol.text
                     self.getFill(style, mark, in_graphic=True)
-                    self.getStroke(style, mark, in_graphic=True)
+                    self.getStroke(style, mark, in_graphic=True, isLine=isLine)
             else:
                 # then it is a WKname
+                logging.debug(f"got a wellknownname in a mark")
                 mark = ET.SubElement(graphic, "Mark")
                 wkn = ET.SubElement(mark, "WellKnownName")
                 if (symbol.text == 'HATCH'):
@@ -207,20 +233,24 @@ class xml_to_sld(object):
                 else:
                     wkn.text = symbol.text
                 self.getFill(style, mark, in_graphic=True)
-                self.getStroke(style, mark, in_graphic=True)
+                self.getStroke(style, mark, in_graphic=True, isLine=isLine)
 
-        s_size = style.find('{http://www.mapserver.org/mapserver}size')
+        s_size = style.find('.//{http://www.mapserver.org/mapserver}size')
+        logging.debug(f"size => {ET.tostring(s_size)}")
+
         if s_size is not None:
+            logging.debug(f"size={s_size.text}")
             size = ET.SubElement(graphic, "Size")
             size.text = s_size.text
-        s_opacity = style.find('{http://www.mapserver.org/mapserver}opacity')
+        s_opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
         if s_opacity is not None:
             opacity = ET.SubElement(graphic, "Opacity")
             opacity.text = str(float(s_opacity.text)/100.0)
-        s_rot = style.find('{http://www.mapserver.org/mapserver}angle')
+        s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
         if s_rot is not None:
             rotation = ET.SubElement(graphic, "Rotation")
             rotation.text = s_rot.text.strip("[] ")
+        logging.debug(f"graphic result = {ET.tostring(style)}")
 
     def getLabel(self, layer, sld, rule, label):
         labelitem = layer.find('{http://www.mapserver.org/mapserver}labelItem')
@@ -570,6 +600,12 @@ class xml_to_sld(object):
                 if layer_type.upper() == 'LINE':
                     symb = ET.SubElement(rule, "LineSymbolizer")
                     self.getStroke(style, symb, isLine=True)
+                    logging.debug(f"after linesymb {ET.tostring(symb)}")
+                    if symb.find(".//Stroke/CssParameter[@name='stroke-dasharray']") is not None:
+                        # move the dash-array to the symbolizer
+                        logging.debug("got to move the dasharray")
+                        dashes = symb.find(".//Stroke/CssParameter[@name='stroke-dasharray']")
+                        symb.find("./Stroke").append(dashes)
 
                 elif layer_type.upper() == 'POLYGON':
                     symb = ET.SubElement(rule, "PolygonSymbolizer")

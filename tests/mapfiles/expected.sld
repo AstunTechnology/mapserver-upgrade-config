@@ -1,0 +1,1 @@
+<LineSymbolizer><Stroke><GraphicStroke><Graphic><Mark><WellKnownName>|line</WellKnownName><Stroke><CssParameter name="stroke">#DE8600</CssParameter><CssParameter name="stroke-width">2</CssParameter></Stroke></Mark><Size>6</Size></Graphic></GraphicStroke><CssParameter name="stroke-dasharray">6 10</CssParameter></Stroke></LineSymbolizer>

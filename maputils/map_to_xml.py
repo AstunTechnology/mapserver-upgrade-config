@@ -11,7 +11,7 @@ import mappyfile
 from functools import reduce  # python 3
 # import dicttoxml
 # from xml.dom.minidom import parseString
-from lxml import etree
+from lxml import etree as ET
 from lxml.etree import CDATA
 
 # import plyplus
@@ -120,7 +120,7 @@ class map_to_xml(object):
             keyx = self.keyCases[key]
         else:
             keyx = key
-        el = etree.SubElement(root, keyx)
+        el = ET.SubElement(root, keyx)
 
         # logging.debug(f"elements = {elements}")
         element = elements[key]
@@ -149,7 +149,7 @@ class map_to_xml(object):
         return el
 
     def makeLegend(self, root, mapp, mapkey):
-        legend = etree.SubElement(root, "Legend")
+        legend = ET.SubElement(root, "Legend")
         for k in mapp[mapkey]:
             logging.debug(f"got legend key {k}")
             if "labels" == k:
@@ -162,7 +162,7 @@ class map_to_xml(object):
 
     def makeLabels(self, s, class_, k):
         logging.debug(f"Making Labels: {s}, {class_}, {k}")
-        labels = etree.SubElement(class_, "Label")
+        labels = ET.SubElement(class_, "Label")
         for kx in k:
             for ky in kx:
                 if 'type' == ky:
@@ -178,8 +178,8 @@ class map_to_xml(object):
 
     def makeLayers(self, root, mapp, mapkey):
         for l in mapp[mapkey]:
-            layer = etree.SubElement(root, "Layer",
-                                     name=l["name"].replace("\"", ""))
+            layer = ET.SubElement(root, "Layer",
+                                  name=l["name"].replace("\"", ""))
             for key in l.keys():
                 if "include" == key:
                     # import the file?
@@ -194,9 +194,9 @@ class map_to_xml(object):
                     logging.debug(f"processing classes")
 
                     for s in l[key]:
-                        class_ = etree.SubElement(layer, "Class")
+                        class_ = ET.SubElement(layer, "Class")
                         for k in s.keys():
-                            # logging.debug(f"got object {s[k]} for key {k}")
+                            logging.debug(f"got object {s[k]} for key {k}")
                             if k == 'name' or k == 'status':
                                 class_.set(k, s[k].replace('"', '')
                                            .replace("'", ""))
@@ -204,10 +204,11 @@ class map_to_xml(object):
                                 st = s['styles']
                                 logging.debug(f"Processing a style: {st}")
 
-                                stEl = etree.SubElement(class_, "Style")
                                 for sty in st:
+                                    stEl = ET.SubElement(class_, "Style")
                                     self.makeStyle(stEl, sty)
                                     stEl = self.sortChildren(stEl, stEl)
+
                             elif "labels" == k:
                                 self.makeLabels(k, class_, s[k])
                             else:
@@ -215,41 +216,42 @@ class map_to_xml(object):
                         class_ = self.sortChildren(class_, class_)
 
                 elif "metadata" == key:
-                    meta = etree.SubElement(layer, "Metadata")
+                    meta = ET.SubElement(layer, "Metadata")
                     c = l[key]
 
                     for kx in c:
-                        item = etree.SubElement(meta, "item",
-                                                name=kx.replace("'", "")
-                                                .replace("\"", ""))
+                        item = ET.SubElement(meta, "item",
+                                             name=kx.replace("'", "")
+                                             .replace("\"", ""))
                     item.text = c[kx].replace("'", "").replace("\"", "")
                 elif "validation" == key:
-                    validation = etree.SubElement(layer, "Validation")
+                    validation = ET.SubElement(layer, "Validation")
                     for k in l["validation"]:
-                        item = etree.SubElement(validation, "item",
-                                                name=k[0].replace("'", "")
-                                                .replace("\"", ""))
+                        item = ET.SubElement(validation, "item",
+                                             name=k[0].replace("'", "")
+                                             .replace("\"", ""))
                         item.text = k[1].replace("'", "").replace("\"", "")
 
                 elif "data" == key:
-                    data = etree.SubElement(layer, "Data")
+                    data = ET.SubElement(layer, "Data")
                     data.text = CDATA(l["data"][0])
                 else:
                     self.makeSubElement(layer, l, key)
             layer = self.sortChildren(layer, layer)
 
     def makeStyle(self, element, style):
+        if "symbol" in style.keys():
+            logging.debug(f"adding Graphic to {ET.tostring(element)}")
+            graph = ET.SubElement(element, "Graphic")
+            element = graph
         for key in style.keys():
             logging.debug(f"processing style {key}")
-            if key == 'symbol' and style[key] == 'dashed':
-                # dashed lines are probably not a graphic symbol
-                logging.debug("skipping dashed")
-                continue
             self.makeSubElement(element, style, key)
         element = self.sortChildren(element, element)
+        logging.debug(f"result {ET.tostring(element)}")
 
     def makeQueryMaps(self, root, mapp, mapkey):
-        qmap = etree.SubElement(root, "QueryMap")
+        qmap = ET.SubElement(root, "QueryMap")
         for k in mapp[mapkey]:
             if 'status' == k:
                 qmap.set("status", mapp[mapkey][k])
@@ -257,15 +259,15 @@ class map_to_xml(object):
                 self.makeSubElement(qmap, mapp[mapkey], k)
 
     def makeWebs(self, root, mapp, mapkey):
-        webs = etree.SubElement(root, "Web")
+        webs = ET.SubElement(root, "Web")
         for k in mapp[mapkey]:
             if "metadata" == k:
-                meta = etree.SubElement(webs, "Metadata")
+                meta = ET.SubElement(webs, "Metadata")
                 c = mapp[mapkey]["metadata"]
                 for kx in c:
-                    item = etree.SubElement(meta, "item",
-                                            name=kx.replace("'", "")
-                                            .replace("\"", ""))
+                    item = ET.SubElement(meta, "item",
+                                         name=kx.replace("'", "")
+                                         .replace("\"", ""))
                     item.text = c[kx].replace("'", "").replace("\"", "")
 
             else:
@@ -273,9 +275,9 @@ class map_to_xml(object):
         webs = self.sortChildren(webs, webs)
 
     def makeOutputFormats(self, root, mapp, mapkey):
-        # outputformats = etree.SubElement(root, mapkey)
+        # outputformats = ET.SubElement(root, mapkey)
         for fmt in mapp[mapkey]:
-            outputformat = etree.SubElement(root, "OutputFormat")
+            outputformat = ET.SubElement(root, "OutputFormat")
             for k in fmt.keys():
                 if 'name' == k:
                     outputformat.set(k, fmt[k])
@@ -284,13 +286,13 @@ class map_to_xml(object):
             outputformat = self.sortChildren(outputformat, outputformat)
 
     def makeProjections(self, root, mapp, mapkey):
-        # proj = etree.SubElement(root, "Projections")
+        # proj = ET.SubElement(root, "Projections")
         for k in mapp[mapkey]:
-            el = etree.SubElement(root, "projection")
+            el = ET.SubElement(root, "projection")
             el.text = str(" ".join(k)).replace("'", "").replace("\"", "")
 
     def makeScalebars(self, root, mapp, mapkey):
-        scalebars = etree.SubElement(root, "ScaleBar")
+        scalebars = ET.SubElement(root, "ScaleBar")
         for k in mapp[mapkey]:
             logging.debug(f"Processing scalebar: {k}, ({mapkey})")
             if 'labels' == k:
@@ -303,17 +305,17 @@ class map_to_xml(object):
 
     def makeConfig(self, root, mapp, mapkey):
 
-        el = etree.SubElement(root, "Config")
+        el = ET.SubElement(root, "Config")
         for k in mapp[mapkey].keys():
-            item = etree.SubElement(el, "item",
-                                    name=k.replace("'", "")
-                                    .replace("\"", ""))
+            item = ET.SubElement(el, "item",
+                                 name=k.replace("'", "")
+                                 .replace("\"", ""))
             item.text = mapp[mapkey][k]
 
     def makeSymbols(self, root, mapp, mapkey):
         logging.debug(f"Processing Symbol: ")
         for k in mapp[mapkey]:
-            el = etree.SubElement(root, "Symbol")
+            el = ET.SubElement(root, "Symbol")
             for d in k:
                 if d == 'name':
                     el.set("name",
@@ -348,11 +350,11 @@ class map_to_xml(object):
                 pass
 
             # parser = mappyfile.parser.Parser()
-            self.root = etree.Element("Map",
-                                      nsmap={
-                                          None:
-                                          "http://www.mapserver.org/mapserver"},
-                                      name=input_file, version="5.6")
+            self.root = ET.Element("Map",
+                                   nsmap={
+                                       None:
+                                       "http://www.mapserver.org/mapserver"},
+                                   name=input_file, version="5.6")
             # map_ = parser.parse_file(input_file)
 
             self.fix_nulls()
@@ -362,11 +364,11 @@ class map_to_xml(object):
         else:
             mapp = mappyfile.utils.loads(input_string,
                                          expand_includes=expand_includes)
-            self.root = etree.Element("Map",
-                                      nsmap={
-                                          None:
-                                          "http://www.mapserver.org/mapserver"},
-                                      version="5.6")
+            self.root = ET.Element("Map",
+                                   nsmap={
+                                       None:
+                                       "http://www.mapserver.org/mapserver"},
+                                   version="5.6")
 
         self.parse(mapp)
 
@@ -413,14 +415,14 @@ class map_to_xml(object):
         # sort tag order to comply with XSD
         ms_ns = "http://www.mapserver.org/mapserver"
         root = self.sortChildren(root,
-                                 etree.Element("Map",
-                                               nsmap={None: ms_ns},
-                                               # name=input_file,
-                                               version="5.6"))
+                                 ET.Element("Map",
+                                            nsmap={None: ms_ns},
+                                            # name=input_file,
+                                            version="5.6"))
         self.map_root = root
 
     def print_map(self):
-        print(etree.tostring(self.map_root, pretty_print=True))
+        print(ET.tostring(self.map_root, pretty_print=True))
 
     def fix_nulls(self):
         # convert "is not null" to " != null" and "is null" to " = NULL"

@@ -1,0 +1,23 @@
+MAP
+	LAYER
+		NAME "prow"
+		TYPE LINE
+		STATUS OFF
+		CLASS
+      NAME "Metro"
+      #           EXPRESSION  ("[tag]"  = "METR" )
+      EXPRESSION ("[tag]"  = "METR" )
+      STYLE
+          COLOR 222 134 0
+          WIDTH 2
+      END
+      STYLE
+          SYMBOL "|line"
+          COLOR 222 134 0
+          WIDTH 2
+          SIZE 6
+          GAP -4
+      END
+		END
+  END
+END
