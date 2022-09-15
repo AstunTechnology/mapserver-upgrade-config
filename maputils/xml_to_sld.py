@@ -56,15 +56,17 @@ class xml_to_sld(object):
                 if isLine:
                     # add GraphicStroke element
                     graphic = ET.SubElement(stroke, "GraphicStroke")
+                else:
+                    graphic = stroke
                 self.getGraphic(style, graphic, in_graphic=True, isLine=isLine)
                 return
         color = style.find('.//{http://www.mapserver.org/mapserver}outlineColor')
-        logging.debug(f"color = {color}")
+        logging.debug(f"outlinecolor = {color}")
         if isLine:
             color = style.find('.//{http://www.mapserver.org/mapserver}color')
-            logging.debug(f"outlinecolor = {color}")
+            logging.debug(f"color = {color}")
         if color is None:
-            color = '#000000'
+            return
         stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")
         self.set_color(stroke_color, color)
 
@@ -104,7 +106,7 @@ class xml_to_sld(object):
             stroke_dash = ET.SubElement(stroke, "CssParameter",
                                         name="stroke-dasharray")
             pattern = line_dash.text.strip('()')
-            if int(pattern) < 0:
+            if ',' not in pattern and int(pattern) < 0:
                 # this should have size added to one or both values I think
                 pattern = str(size)+" "+str(abs(int(pattern))+size)
             stroke_dash.text = pattern
@@ -122,14 +124,15 @@ class xml_to_sld(object):
             self.getGraphic(style, symb, True)
             if symb.find("./Graphic") is not None:
                 return
-        color = style.find('{http://www.mapserver.org/mapserver}color')
+        color = style.find('.//{http://www.mapserver.org/mapserver}color')
         if color is None:
+            logging.debug(f"no fill color in {ET.tostring(style)}")
             return
         fill = ET.SubElement(symb, "Fill")
         if color is not None:
             fill_color = ET.SubElement(fill, "CssParameter", name="fill")
             self.set_color(fill_color, color)
-        opacity = style.find('{http://www.mapserver.org/mapserver}opacity')
+        opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
         if opacity is not None:
             fill_opacity = ET.SubElement(fill, "CssParameter",
                                          name="fill-opacity")
@@ -611,6 +614,7 @@ class xml_to_sld(object):
                     symb = ET.SubElement(rule, "PolygonSymbolizer")
                     self.getFill(style, symb)
                     self.getStroke(style, symb)
+
                 elif layer_type.upper() == 'POINT':
                     symb = ET.SubElement(rule, "PointSymbolizer")
                     self.getGraphic(style, symb)

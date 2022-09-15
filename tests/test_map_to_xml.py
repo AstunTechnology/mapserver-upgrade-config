@@ -209,6 +209,8 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(symbolizer.find("./Stroke/CssParameter[@name='stroke-dasharray']") is not None)
             exp_tree = ET.parse(f"{self.THIS_DIR}/mapfiles/expected.sld")
             diff = main.diff_trees(exp_tree, symbolizer)
+            if len(diff) > 0:
+                print(diff)
             self.assertTrue(0 == len(diff))
 
     @ignore_warnings
@@ -307,8 +309,8 @@ class Test_update_mapsource(unittest.TestCase):
         root = obs.map_root
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
-            # print("layer", layer)
-            # ET.dump(sldStore.getLayer(layer))
+            print("layer", layer)
+            ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
             self.assertTrue(
                 sldStore.getLayer(layer).find(".//Fill") is not None)
