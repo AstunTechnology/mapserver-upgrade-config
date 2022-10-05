@@ -44,14 +44,14 @@ class xml_to_sld(object):
         colors.append(color.get('blue'))
         return "#" + "".join("{:02X}".format(int(a)) for a in colors)
 
-    def getStroke(self, style, symbol, isLine=False, in_graphic=False):
+    def getStroke(self, style, symbol, isLine=False, is_polygon=False, in_graphic=False):
 
         logging.debug(f"in getStroke: {ET.tostring(style)} in_graphic? {in_graphic}")
 
         stroke = ET.SubElement(symbol, "Stroke")
         if not in_graphic:
             logging.debug(f"looking for Graphic in {ET.tostring(style)}")
-            if style.find(".//{http://www.mapserver.org/mapserver}Graphic") is not None:
+            if style.find(".//{http://www.mapserver.org/mapserver}Graphic") is not None and not is_polygon:
                 logging.debug("found a graphic")
                 if isLine:
                     # add GraphicStroke element
@@ -62,10 +62,11 @@ class xml_to_sld(object):
                 return
         color = style.find('.//{http://www.mapserver.org/mapserver}outlineColor')
         logging.debug(f"outlinecolor = {color}")
-        if isLine:
+        if isLine and color is None:
             color = style.find('.//{http://www.mapserver.org/mapserver}color')
             logging.debug(f"color = {color}")
         if color is None:
+            symbol.remove(stroke)
             return
         stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")
         self.set_color(stroke_color, color)
@@ -82,7 +83,7 @@ class xml_to_sld(object):
         if width is None:
             width = size
         if size is not None:
-            size = int(size.text)
+            size = float(size.text)
         else:
             size = 0
         if width is not None:
@@ -119,16 +120,24 @@ class xml_to_sld(object):
             logging.debug(f"stroke_offset (gap) -> {ET.tostring(stroke_offset)}")
         # ET.dump(stroke)
 
-    def getFill(self, style, symb, in_graphic=False):
+    def getFill(self, style, symb, in_graphic=False, is_polygon=False):
+        fill = ET.SubElement(symb, "Fill")
         if not in_graphic:
-            self.getGraphic(style, symb, True)
-            if symb.find("./Graphic") is not None:
+            logging.debug(f"looking for Graphic in {ET.tostring(style)}")
+            if style.find(".//{http://www.mapserver.org/mapserver}Graphic") is not None:
+                logging.debug("found a graphic")
+                if is_polygon:
+                    # add GraphicFill element
+                    graphic = ET.SubElement(fill, "GraphicFill")
+                else:
+                    graphic = fill
+                self.getGraphic(style, graphic, in_graphic=True, isPolygon=is_polygon)
                 return
         color = style.find('.//{http://www.mapserver.org/mapserver}color')
         if color is None:
             logging.debug(f"no fill color in {ET.tostring(style)}")
+            symb.remove(fill)
             return
-        fill = ET.SubElement(symb, "Fill")
         if color is not None:
             fill_color = ET.SubElement(fill, "CssParameter", name="fill")
             self.set_color(fill_color, color)
@@ -193,7 +202,7 @@ class xml_to_sld(object):
 
         return True
 
-    def getGraphic(self, style, symb, in_graphic=False, isLine=False):
+    def getGraphic(self, style, symb, in_graphic=False, isLine=False, isPolygon=False):
         logging.debug(f"processing graphic in {ET.tostring(style)}")
         if style.find("./Graphic") is not None:
             return
@@ -239,7 +248,6 @@ class xml_to_sld(object):
                 self.getStroke(style, mark, in_graphic=True, isLine=isLine)
 
         s_size = style.find('.//{http://www.mapserver.org/mapserver}size')
-        logging.debug(f"size => {ET.tostring(s_size)}")
 
         if s_size is not None:
             logging.debug(f"size={s_size.text}")
@@ -331,7 +339,12 @@ class xml_to_sld(object):
                     dispy.text = offset.attrib['y']
                 if angle is not None:
                     ang = ET.SubElement(pPlace, "Rotation")
-                    ang.text = angle.text
+                    if '[' in angle.text:
+                        angle.text = angle.text.strip("[]")
+                        prop = ET.SubElement(ang, "PropertyName")
+                        prop.text = angle.text
+                    else:
+                        ang.text = angle.text
             elif layer.attrib['type'] == 'LINE':
                 if offset is not None:
                     lPlace = ET.SubElement(labPlace, "LinePlacement")
@@ -469,7 +482,6 @@ class xml_to_sld(object):
         f.attrib['singleChar'] = '.'
         f.attrib['escapeChar'] = '\\'
         exprText = exprText.replace('(', '').replace(')', '')
-        exprText = exprText.replace("^", "").replace("$", "")
 
         index = exprText.find('~')
         classtext = exprText[:index]
@@ -479,6 +491,18 @@ class xml_to_sld(object):
         else:
             f.attrib['matchCase'] = 'true'
             exprText = exprText[index+1:]
+
+        exprText = exprText.strip()
+        logging.debug(f"Like expr = '{exprText}'")
+        start_anc = exprText.startswith('^')
+        end_anc = exprText.endswith('$')
+        logging.debug(f"{start_anc=} {end_anc=}")
+        exprText = exprText.replace("^", "").replace("$", "")
+        # like patterns have to match the whole string so add wildcards to start end if needed
+        if not start_anc:
+            exprText = '.*'+exprText
+        if not end_anc:
+            exprText = exprText+".*"
         prop = ET.SubElement(f, "PropertyName")
         if classtext:
             prop.text = classtext.strip("[] ")
@@ -612,8 +636,8 @@ class xml_to_sld(object):
 
                 elif layer_type.upper() == 'POLYGON':
                     symb = ET.SubElement(rule, "PolygonSymbolizer")
-                    self.getFill(style, symb)
-                    self.getStroke(style, symb)
+                    self.getFill(style, symb, is_polygon=True)
+                    self.getStroke(style, symb, is_polygon=True)
 
                 elif layer_type.upper() == 'POINT':
                     symb = ET.SubElement(rule, "PointSymbolizer")

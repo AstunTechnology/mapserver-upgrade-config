@@ -209,8 +209,8 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(symbolizer.find("./Stroke/CssParameter[@name='stroke-dasharray']") is not None)
             exp_tree = ET.parse(f"{self.THIS_DIR}/mapfiles/expected.sld")
             diff = main.diff_trees(exp_tree, symbolizer)
-            if len(diff) > 0:
-                print(diff)
+            if len(diff) != 0:
+                print(f"Diff:\n {diff}")
             self.assertTrue(0 == len(diff))
 
     @ignore_warnings
@@ -465,6 +465,33 @@ class Test_update_mapsource(unittest.TestCase):
                 sldStore.getLayer(layer).find(".//Literal") is not None)
             self.assertEqual("Dudley MBC.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
+
+    @ignore_warnings
+    def test_outlinecolor_in_line(self):
+        instr = """
+        MAP
+            LAYER
+                NAME "tra_edu_dcc_hazroutes"
+                TYPE LINE
+                STATUS OFF
+                CLASS
+                    NAME "Requiring Traffic Monitoring"
+                    EXPRESSION ("[req_traffic_monitoriing]" eq "T" )
+                    STYLE
+                        OPACITY 100
+                        OUTLINECOLOR 255 255 0
+                        WIDTH 3
+                    END
+                END
+            END
+        END"""
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            ET.dump(sldStore.getLayer(layer))
 
     @ignore_warnings
     def test_expression_in_filter(self):
@@ -726,6 +753,35 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("Grade 3b", literals[1].text)
 
     @ignore_warnings
+    def test_dashed_paths2(self):
+        instr = """
+        MAP
+            LAYER
+                NAME "tra_edu_dcc_hazroutes"
+                TYPE LINE
+                STATUS OFF
+                CLASSITEM ian
+            CLASS
+      NAME "Carer/Support to Carer"
+      EXPRESSION "SSCA"
+      STYLE
+        SYMBOL "circle"
+        OUTLINECOLOR 0 0 255
+        SIZE 5.5
+      END
+    END
+            END
+        END
+        """
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+
+    @ignore_warnings
     def test_dashed_paths(self):
         instr = """
         MAP
@@ -765,3 +821,171 @@ class Test_update_mapsource(unittest.TestCase):
         for layer in sldStore.layers:
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
+
+    @ignore_warnings
+    def test_rotation(self):
+        instr = """
+        MAP
+        LAYER
+    DATA "wkb_geometry from (select * from osmm.vew_carto_text_overlay) as foo using unique ogc_fid using srid=27700"
+    METADATA
+       "qstring_validation_pattern" "."
+    END
+    NAME "mastermap_carto_text"
+    STATUS OFF
+    TYPE POINT
+    UNITS METERS
+    LABELITEM "textstring"
+    CLASS
+      MAXSCALEDENOM 2500
+      STYLE
+#       OUTLINECOLOR 143 143 143
+#       WIDTH 1
+
+      END
+      LABEL
+        TYPE TrueType
+        FONT "arialbd"
+        COLOR 1 191 254
+#       OUTLINECOLOR 255 255 255
+        ANGLE [orientation]
+        SIZE 7
+        POSITION cr
+      END
+    END
+  END
+        END
+        """
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            rot = sldStore.getLayer(layer).find(".//Rotation")
+            # ET.dump(rot)
+            self.assertTrue(rot.find(".//PropertyName") is not None)
+
+    @ignore_warnings
+    def test_two_styles(self):
+        map = """
+        MAP
+            LAYER
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE LINE
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "New Stop"
+                    EXPRESSION "New Station"
+                    STYLE
+                        COLOR 0 0 0
+                        WIDTH 5
+                    END
+                    STYLE
+                        COLOR 200 22 25
+                        WIDTH 4
+                    END
+                    LABEL
+                        TYPE TrueType
+                        FONT "arialbd"
+                        COLOR 200 22 25
+                        OUTLINECOLOR 255 255 255
+                        SIZE 8
+                        POSITION AUTO
+                    END
+                END
+            END
+        END
+        """
+        obs = map_to_xml.map_to_xml(input_string=map)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//LineSymbolizer")))
+
+    @ignore_warnings
+    def test_hatching_graphic_fill(self):
+        map = """
+        MAP
+            LAYER
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE POLYGON
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "Building Height 0-10m"
+                    EXPRESSION ([code]>0 AND [code]<10 )
+                    STYLE
+                        SYMBOL "HATCH"
+                        COLOR 0 255 64
+                        SIZE 10
+                        ANGLE 45
+                        WIDTH 2
+                    END
+                    STYLE
+                        OUTLINECOLOR 0 255 64
+                        WIDTH 2
+                    END
+                END
+            END
+        END
+        """
+        obs = map_to_xml.map_to_xml(input_string=map)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//GraphicFill")))
+            self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
+            self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//Stroke")))
+
+    @ignore_warnings
+    def test_pattern(self):
+        map = """
+        MAP
+            LAYER
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE POLYGON
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "Postcode Sector 0"
+                    EXPRESSION ('[postcode]' ~* '0..$')
+                    STYLE
+                        OUTLINECOLOR 255 0 0
+                        WIDTH 0.5
+                    END
+                    STYLE
+                        COLOR 255 0 0
+                        OPACITY 40
+                    END
+                END
+            END
+        END
+        """
+        obs = map_to_xml.map_to_xml(input_string=map)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertEquals('.*0..', sldStore.getLayer(layer).find(".//Literal").text)
+
+    @ignore_warnings
+    def test_web_process_present(self):
+        obs = map_to_xml.map_to_xml(input_file='%s/webproc.map' % self.data_path,
+                                    expand_includes=False)
+        root = obs.map_root
+        # ET.dump(root, pretty_print=True)
+        self.assertTrue(root is not None)
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            self.assertTrue(sldStore.getLayer(layer))
