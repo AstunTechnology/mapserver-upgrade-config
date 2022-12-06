@@ -291,6 +291,7 @@ class Test_update_mapsource(unittest.TestCase):
         CLASS
         NAME ""
             STYLE
+                OUTLINECOLOR 156 72 12
                 COLOR 156 72 12
                 SIZE 6
                 SYMBOL "circle"
@@ -312,12 +313,55 @@ class Test_update_mapsource(unittest.TestCase):
             print("layer", layer)
             ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertTrue(
-                sldStore.getLayer(layer).find(".//Fill") is not None)
-            self.assertTrue(
-                sldStore.getLayer(layer).find(".//Stroke") is not None)
+            self.assertTrue(sldStore.getLayer(layer).find(".//Fill") is not None)
+
+            stroke = sldStore.getLayer(layer).find(".//Stroke")
+            self.assertTrue(stroke is not None)
+            # issue 40 - don't double set stroke-width and Size
+            good = False
+            for css in stroke.iter("CssParameter"):
+                good = good or css.attrib['name'] == 'stroke-width' or css.attrib['name'] == 'stroke-opacity'
+            self.assertTrue(good)
+            self.assertTrue(sldStore.getLayer(layer).find(".//Size") is not None)
 
     @ignore_warnings
+    def test_marks_sizes(self):
+        instr = """MAP
+        LAYER
+            NAME "test"
+            TYPE POINT
+            CLASS
+                NAME "Postal Address"
+                EXPRESSION "Y"
+                MAXSCALEDENOM 5000
+                STYLE
+                    SYMBOL "circle"
+                    OUTLINECOLOR 0 0 0
+                    COLOR 0 128 0
+                    SIZE 7
+                    OPACITY 80
+                END
+            END
+        END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertTrue(sldStore.getLayer(layer).find(".//Fill") is not None)
+
+            stroke = sldStore.getLayer(layer).find(".//Stroke")
+            self.assertTrue(stroke is not None)
+            # issue 40 - don't double set stroke-width and Size
+            bad = False
+            for css in stroke.iter("CssParameter"):
+                bad = bad or css.attrib['name'] == 'stroke-width'
+            self.assertFalse(bad)
+            self.assertTrue(sldStore.getLayer(layer).find(".//Size") is not None)
+
+    @ ignore_warnings
     def test_property_name(self):
         instr = """MAP
             LAYER
@@ -353,7 +397,7 @@ class Test_update_mapsource(unittest.TestCase):
                 sldStore.getLayer(layer).find(".//PropertyIsEqualTo") is
                 not None)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_like_filter(self):
         instr = """MAP
             LAYER
@@ -404,7 +448,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("Commercial.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_like2_filter(self):
         instr = """MAP
             LAYER
@@ -435,7 +479,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual(".*Dudley MBC.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_like3_filter(self):
         instr = """MAP
             LAYER
@@ -466,7 +510,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual(".*Dudley MBC.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_outlinecolor_in_line(self):
         instr = """
         MAP
@@ -493,7 +537,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(sldStore.getLayer(layer) is not None)
             ET.dump(sldStore.getLayer(layer))
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_expression_in_filter(self):
         instr = """
         MAP
