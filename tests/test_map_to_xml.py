@@ -432,7 +432,7 @@ class Test_update_mapsource(unittest.TestCase):
                 sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
             self.assertTrue(
                 sldStore.getLayer(layer).find(".//Literal") is not None)
-            self.assertEqual("Dudley MBC.*",
+            self.assertEqual(".*Dudley MBC.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
     @ignore_warnings
@@ -463,7 +463,7 @@ class Test_update_mapsource(unittest.TestCase):
                 sldStore.getLayer(layer).find(".//PropertyIsLike") is not None)
             self.assertTrue(
                 sldStore.getLayer(layer).find(".//Literal") is not None)
-            self.assertEqual("Dudley MBC.*",
+            self.assertEqual(".*Dudley MBC.*",
                              sldStore.getLayer(layer).find(".//Literal").text)
 
     @ignore_warnings
@@ -667,9 +667,9 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("status_code", properties[2].text)
             literals = sldStore.getLayer(layer).findall(".//Literal")
             self.assertTrue(literals is not None)
-            self.assertEqual("LBI",  literals[0].text)
+            self.assertEqual("LBI", literals[0].text)
             self.assertEqual("LBII*", literals[1].text)
-            self.assertEqual("LBD",  literals[2].text)
+            self.assertEqual("LBD", literals[2].text)
 
     @ignore_warnings
     def test_simple_in_expressions(self):
@@ -708,9 +708,9 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("status_code", properties[2].text)
             literals = sldStore.getLayer(layer).findall(".//Literal")
             self.assertTrue(literals is not None)
-            self.assertEqual("LBI",  literals[0].text)
+            self.assertEqual("LBI", literals[0].text)
             self.assertEqual("LBII", literals[1].text)
-            self.assertEqual("LBD",  literals[2].text)
+            self.assertEqual("LBD", literals[2].text)
 
     @ignore_warnings
     def test_list_expressions(self):
@@ -907,6 +907,51 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
             self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//LineSymbolizer")))
+
+    @ignore_warnings
+    def test_hatching_graphic_rotate(self):
+        map = """
+        MAP
+            LAYER
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE POLYGON
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "Building Height 0-10m"
+                    EXPRESSION ([code]>0 AND [code]<10 )
+                    STYLE
+                        SYMBOL "HATCH"
+                        COLOR 0 255 64
+                        SIZE 10
+                        ANGLE 45
+                        WIDTH 2
+                    END
+                    STYLE
+                        OUTLINECOLOR 0 255 64
+                        WIDTH 2
+                    END
+                END
+            END
+        END
+        """
+        maps = [map, map.replace('ANGLE 45', 'ANGLE 90'), map.replace('ANGLE 45', 'ANGLE 135')]
+        expected_symbol = ['/line', '|line', '\\line']
+        for map, symb in zip(maps, expected_symbol):
+            obs = map_to_xml.map_to_xml(input_string=map)
+            root = obs.map_root
+            sldStore = xml_to_sld.xml_to_sld("", root=root)
+            for layer in sldStore.layers:
+                self.assertTrue(sldStore.getLayer(layer) is not None)
+                # ET.dump(sldStore.getLayer(layer))
+                gf = sldStore.getLayer(layer).findall(".//GraphicFill")
+                self.assertEquals(1, len(gf))
+                self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
+                self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//Stroke")))
+                rot = sldStore.getLayer(layer).find(".//Rotation")
+                self.assertEquals(None, rot)
+                self.assertEqual(symb, gf[0].find(".//WellKnownName").text)
 
     @ignore_warnings
     def test_hatching_graphic_fill(self):

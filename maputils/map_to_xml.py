@@ -177,23 +177,23 @@ class map_to_xml(object):
         return kx
 
     def makeLayers(self, root, mapp, mapkey):
-        for l in mapp[mapkey]:
+        for layers in mapp[mapkey]:
             layer = ET.SubElement(root, "Layer",
-                                  name=l["name"].replace("\"", ""))
-            for key in l.keys():
+                                  name=layers["name"].replace("\"", ""))
+            for key in layers.keys():
                 if "include" == key:
                     # import the file?
                     pass
                 elif "name" == key:
                     pass
                 elif "status" == key:
-                    layer.set("status", l[key])
+                    layer.set("status", layers[key])
                 elif "type" == key:
-                    layer.set("type", l[key])
+                    layer.set("type", layers[key])
                 elif "classes" == key:
-                    logging.debug(f"processing classes")
+                    logging.debug("processing classes")
 
-                    for s in l[key]:
+                    for s in layers[key]:
                         class_ = ET.SubElement(layer, "Class")
                         for k in s.keys():
                             logging.debug(f"got object {s[k]} for key {k}")
@@ -217,7 +217,7 @@ class map_to_xml(object):
 
                 elif "metadata" == key:
                     meta = ET.SubElement(layer, "Metadata")
-                    c = l[key]
+                    c = layers[key]
 
                     for kx in c:
                         item = ET.SubElement(meta, "item",
@@ -226,7 +226,7 @@ class map_to_xml(object):
                     item.text = c[kx].replace("'", "").replace("\"", "")
                 elif "validation" == key:
                     validation = ET.SubElement(layer, "Validation")
-                    for k in l["validation"]:
+                    for k in layers["validation"]:
                         item = ET.SubElement(validation, "item",
                                              name=k[0].replace("'", "")
                                              .replace("\"", ""))
@@ -234,9 +234,9 @@ class map_to_xml(object):
 
                 elif "data" == key:
                     data = ET.SubElement(layer, "Data")
-                    data.text = CDATA(l["data"][0])
+                    data.text = CDATA(layers["data"][0])
                 else:
-                    self.makeSubElement(layer, l, key)
+                    self.makeSubElement(layer, layers, key)
             layer = self.sortChildren(layer, layer)
 
     def makeStyle(self, element, style):
@@ -313,7 +313,7 @@ class map_to_xml(object):
             item.text = mapp[mapkey][k]
 
     def makeSymbols(self, root, mapp, mapkey):
-        logging.debug(f"Processing Symbol: ")
+        logging.debug("Processing Symbol: ")
         for k in mapp[mapkey]:
             el = ET.SubElement(root, "Symbol")
             for d in k:
@@ -458,7 +458,7 @@ def main():
 
     logging.info("Processing {}".format(args.inputfile))
 
-    mapper = map_to_xml(args.inputfile,  output_file=args.outputfile)
+    mapper = map_to_xml(args.inputfile, output_file=args.outputfile)
     mapper.print_map()
 
 

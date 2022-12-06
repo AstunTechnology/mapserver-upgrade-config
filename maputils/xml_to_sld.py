@@ -23,7 +23,7 @@ class XQName(QName):
         elif tag is None:
             self.tag = uri
         else:
-            self.text = '{'+uri+'}'+tag
+            self.text = '{' + uri + '}' + tag
 
 
 class xml_to_sld(object):
@@ -75,7 +75,7 @@ class xml_to_sld(object):
         if opacity is not None:
             fill_opacity = ET.SubElement(stroke, "CssParameter",
                                          name="stroke-opacity")
-            fill_opacity.text = str(float(opacity.text)/100.0)
+            fill_opacity.text = str(float(opacity.text) / 100.0)
         width = style.find('.//{http://www.mapserver.org/mapserver}outlineWidth')
         if width is None:
             width = style.find('.//{http://www.mapserver.org/mapserver}width')
@@ -109,7 +109,7 @@ class xml_to_sld(object):
             pattern = line_dash.text.strip('()')
             if ',' not in pattern and int(pattern) < 0:
                 # this should have size added to one or both values I think
-                pattern = str(size)+" "+str(abs(int(pattern))+size)
+                pattern = str(size) + " " + str(abs(int(pattern)) + size)
             stroke_dash.text = pattern
             logging.debug(f"line_dash (stroke_dash) -> {ET.tostring(line_dash)}")
         line_gap = style.find('.//{http://www.mapserver.org/mapserver}initialGap')
@@ -145,7 +145,7 @@ class xml_to_sld(object):
         if opacity is not None:
             fill_opacity = ET.SubElement(fill, "CssParameter",
                                          name="fill-opacity")
-            fill_opacity.text = str(float(opacity.text)/100.0)
+            fill_opacity.text = str(float(opacity.text) / 100.0)
         # manage graphic fills
 
     def isFile(self, text):
@@ -157,7 +157,7 @@ class xml_to_sld(object):
             return False
 
     def isURL(self, text):
-        if(text.startswith("http://")):
+        if text.startswith("http://"):
             return True
         else:
             return False
@@ -225,11 +225,10 @@ class xml_to_sld(object):
                     self.buildGraphic(s,
                                       graphic,
                                       s.find(
-                                          './/{http://www.mapserver' +
-                                          '.org/mapserver}image').text)
+                                          './/{http://www.mapserver.org/mapserver}image').text)
                 else:
                     # then it is a WKname
-                    logging.debug(f"got a wellknownname in a mark")
+                    logging.debug("got a wellknownname in a mark")
                     mark = ET.SubElement(graphic, "Mark")
                     wkn = ET.SubElement(mark, "WellKnownName")
                     wkn.text = symbol.text
@@ -237,11 +236,23 @@ class xml_to_sld(object):
                     self.getStroke(style, mark, in_graphic=True, isLine=isLine)
             else:
                 # then it is a WKname
-                logging.debug(f"got a wellknownname in a mark")
+                logging.debug("got a wellknownname in a mark")
                 mark = ET.SubElement(graphic, "Mark")
                 wkn = ET.SubElement(mark, "WellKnownName")
+                # see issue #28
                 if (symbol.text == 'HATCH'):
-                    wkn.text = '/line'
+                    s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
+                    if s_rot is not None:
+                        if s_rot.text == '45':
+                            wkn.text = '/line'
+                        elif s_rot.text == '90':
+                            wkn.text = '|line'
+                        elif s_rot.text == '135':
+                            wkn.text = '\\line'
+                        else:
+                            wkn.text = '/line'
+                    else:
+                        wkn.text = '/line'
                 else:
                     wkn.text = symbol.text
                 self.getFill(style, mark, in_graphic=True)
@@ -256,11 +267,12 @@ class xml_to_sld(object):
         s_opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
         if s_opacity is not None:
             opacity = ET.SubElement(graphic, "Opacity")
-            opacity.text = str(float(s_opacity.text)/100.0)
+            opacity.text = str(float(s_opacity.text) / 100.0)
         s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
         if s_rot is not None:
-            rotation = ET.SubElement(graphic, "Rotation")
-            rotation.text = s_rot.text.strip("[] ")
+            if symbol.text != 'HATCH':
+                rotation = ET.SubElement(graphic, "Rotation")
+                rotation.text = s_rot.text.strip("[] ")
         logging.debug(f"graphic result = {ET.tostring(style)}")
 
     def getLabel(self, layer, sld, rule, label):
@@ -291,8 +303,7 @@ class xml_to_sld(object):
         angle = label.find('{http://www.mapserver.org/mapserver}angle')
         if pos is not None or offset is not None:
             labPlace = ET.SubElement(sText, "LabelPlacement")
-            if layer.attrib['type'] == 'POINT' or (layer.attrib['type']
-                                                   == 'POLYGON'):
+            if layer.attrib['type'] == 'POINT' or (layer.attrib['type'] == 'POLYGON'):
                 pPlace = ET.SubElement(labPlace, "PointPlacement")
                 anchor = ET.SubElement(pPlace, "AnchorPoint")
                 anchorX = ET.SubElement(anchor, "AnchorPointX")
@@ -417,7 +428,7 @@ class xml_to_sld(object):
         left = left.lstrip("(")
         left = left.strip(" ")
         self.process_expr(f, None, left)
-        right = exprText[index+3:]
+        right = exprText[index + 3:]
         right = right.strip(" ")
         right = right.rstrip("(")
         right = right.strip(" ")
@@ -432,7 +443,7 @@ class xml_to_sld(object):
         left = left.lstrip("(")
         left = left.strip(" ")
         self.process_expr(f, None, left)
-        right = exprText[index+2:]
+        right = exprText[index + 2:]
         right = right.strip(" ")
         right = right.rstrip("(")
         right = right.strip(" ")
@@ -487,10 +498,10 @@ class xml_to_sld(object):
         classtext = exprText[:index]
         if ' ~*' in exprText:
             f.attrib['matchCase'] = 'false'
-            exprText = exprText[index+2:]
+            exprText = exprText[index + 2:]
         else:
             f.attrib['matchCase'] = 'true'
-            exprText = exprText[index+1:]
+            exprText = exprText[index + 1:]
 
         exprText = exprText.strip()
         logging.debug(f"Like expr = '{exprText}'")
@@ -500,9 +511,9 @@ class xml_to_sld(object):
         exprText = exprText.replace("^", "").replace("$", "")
         # like patterns have to match the whole string so add wildcards to start end if needed
         if not start_anc:
-            exprText = '.*'+exprText
+            exprText = '.*' + exprText
         if not end_anc:
-            exprText = exprText+".*"
+            exprText = exprText + ".*"
         prop = ET.SubElement(f, "PropertyName")
         if classtext:
             prop.text = classtext.strip("[] ")
@@ -568,7 +579,7 @@ class xml_to_sld(object):
         # so fix it!
         for x in root.getiterator():
             if '{' not in x.tag:
-                x.tag = "{"+ns+"}"+x.tag
+                x.tag = "{" + ns + "}" + x.tag
 
         self.symbols = {}
         for symbol in root.iterfind(QName(ns, 'Symbol')):
