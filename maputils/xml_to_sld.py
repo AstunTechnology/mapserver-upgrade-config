@@ -253,6 +253,7 @@ class xml_to_sld(object):
                     else:
                         wkn.text = '/line'
                 else:
+                    # TODO: Handle text symbols
                     wkn.text = symbol.text
                 self.getFill(style, mark, in_graphic=True)
                 self.getStroke(style, mark, in_graphic=True, isLine=isLine)
