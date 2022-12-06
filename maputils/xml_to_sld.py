@@ -72,7 +72,7 @@ class xml_to_sld(object):
         self.set_color(stroke_color, color)
 
         opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
-        if opacity is not None:
+        if opacity is not None and not in_graphic:
             fill_opacity = ET.SubElement(stroke, "CssParameter",
                                          name="stroke-opacity")
             fill_opacity.text = str(float(opacity.text) / 100.0)
@@ -80,8 +80,6 @@ class xml_to_sld(object):
         if width is None:
             width = style.find('.//{http://www.mapserver.org/mapserver}width')
         size = style.find('.//{http://www.mapserver.org/mapserver}size')
-        if width is None:
-            width = size
         if size is not None:
             size = float(size.text)
         else:
@@ -142,7 +140,7 @@ class xml_to_sld(object):
             fill_color = ET.SubElement(fill, "CssParameter", name="fill")
             self.set_color(fill_color, color)
         opacity = style.find('.//{http://www.mapserver.org/mapserver}opacity')
-        if opacity is not None:
+        if opacity is not None and not in_graphic:
             fill_opacity = ET.SubElement(fill, "CssParameter",
                                          name="fill-opacity")
             fill_opacity.text = str(float(opacity.text) / 100.0)
@@ -243,6 +241,7 @@ class xml_to_sld(object):
                 if (symbol.text == 'HATCH'):
                     s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
                     if s_rot is not None:
+                        print(s_rot.text)
                         if s_rot.text == '45':
                             wkn.text = '/line'
                         elif s_rot.text == '90':
