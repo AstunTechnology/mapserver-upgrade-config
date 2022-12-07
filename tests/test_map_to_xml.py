@@ -37,6 +37,39 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertTrue(root is not None)
 
     @ignore_warnings
+    def test_read_sql(self):
+        map = """
+        MAP
+          LAYER
+    NAME "PlanApp_2000_2009"
+    STATUS OFF
+    TYPE POLYGON
+    OPACITY 20
+    DATA "wkb_geometry from (select * FROM PLANNING_SCHEMA.allplanning_2000_onwards_polys_and_data where \"CaseFullRef\" < '09/P/99999') as foo using unique ogc_fid using srid=27700"
+    TOLERANCEUNITS PIXELS
+    METADATA
+      ows_title "PlanApp_2000_2009"
+      ows_abstract "PlanApp_2000_2009"
+          END
+    VALIDATION
+      qstring '.'
+
+    END
+    CLASS
+      NAME ""
+      STYLE
+        COLOR 249 014 255
+      END
+    END
+  END
+  END
+        """
+        obs = map_to_xml.map_to_xml(input_string=map)
+        root = obs.map_root
+        self.assertTrue(root is not None)
+        print(ET.tostring(root, pretty_print=True))
+
+    @ignore_warnings
     def test_polygon_mark_fill(self):
         sym_file = ('%s/polyfill.map' % self.data_path)
         sldStore = self.read_map_file(sym_file)
