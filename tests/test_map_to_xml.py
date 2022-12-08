@@ -103,6 +103,35 @@ class Test_update_mapsource(unittest.TestCase):
         return sldStore
 
     @ignore_warnings
+    def test_bracketed_expressions(self):
+        logging.basicConfig(level=10)
+        instr = """MAP
+        LAYER
+        NAME "test"
+        TYPE LINE
+        CLASSITEM "foo"
+        CLASS
+            NAME "Single Tree Order status unknown"
+            EXPRESSION ("[tag_desc]" = "Single Tree Order (Status Unknown)")
+            STYLE
+                SYMBOL "triangle"
+                COLOR 0 255 0
+                SIZE 10
+            END
+        END
+        END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # print("layer", layer)
+            ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(layer is not None)
+            literal = sldStore.getLayer(layer).find('.//Literal')
+            self.assertEquals("Single Tree Order (Status Unknown)", literal.text)
+
+    @ ignore_warnings
     def test_opacity(self):
         instr = """MAP
         LAYER
@@ -131,7 +160,7 @@ class Test_update_mapsource(unittest.TestCase):
             good = good or css.attrib['name'] == 'stroke-opacity'
         self.assertTrue(good)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_legend(self):
         """make sure fix for issue #11 works"""
         instr = """MAP
@@ -199,7 +228,7 @@ class Test_update_mapsource(unittest.TestCase):
         labels = scale.find("Label")
         self.assertTrue(labels)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_graphic_stroke(self):
         instr = """MAP
             LAYER
@@ -246,7 +275,7 @@ class Test_update_mapsource(unittest.TestCase):
                 print(f"Diff:\n {diff}")
             self.assertTrue(0 == len(diff))
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_dashes(self):
         sym_file = ('%s/dashes.map' % self.data_path)
         sldStore = self.read_map_file(sym_file)
@@ -261,7 +290,7 @@ class Test_update_mapsource(unittest.TestCase):
         # ET.dump(sldStore.getLayer(layer))
         style = sldStore.getLayer(layer)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_raster(self):
         instr = """MAP
         LAYER
@@ -315,7 +344,7 @@ class Test_update_mapsource(unittest.TestCase):
             for _i, cme in enumerate(sldStore.getLayer(layer).iterfind(".//ColorMapEntry")):
                 self.assertEquals(expected[_i], cme.attrib['quantity'])
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_marks(self):
         instr = """MAP
         LAYER
@@ -357,7 +386,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(good)
             self.assertTrue(sldStore.getLayer(layer).find(".//Size") is not None)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_marks_sizes(self):
         instr = """MAP
         LAYER

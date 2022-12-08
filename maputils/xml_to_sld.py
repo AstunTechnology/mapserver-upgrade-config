@@ -241,7 +241,7 @@ class xml_to_sld(object):
                 if (symbol.text == 'HATCH'):
                     s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
                     if s_rot is not None:
-                        print(s_rot.text)
+                        # print(s_rot.text)
                         if s_rot.text == '45':
                             wkn.text = '/line'
                         elif s_rot.text == '90':
@@ -430,7 +430,7 @@ class xml_to_sld(object):
         self.process_expr(f, None, left)
         right = exprText[index + 3:]
         right = right.strip(" ")
-        right = right.rstrip("(")
+        right = right.rstrip(")")
         right = right.strip(" ")
         self.process_expr(f, None, right)
 
@@ -445,7 +445,7 @@ class xml_to_sld(object):
         self.process_expr(f, None, left)
         right = exprText[index + 2:]
         right = right.strip(" ")
-        right = right.rstrip("(")
+        right = right.rstrip(")")
         right = right.strip(" ")
         self.process_expr(f, None, right)
 
@@ -521,10 +521,18 @@ class xml_to_sld(object):
         literal.text = exprText.strip()
 
     def process_regexpr(self, exprText, filterEL):
-        text = exprText.strip("( )")
-        text = text.replace('  ', ' ')
+        text = exprText.strip()
+        # print(f"before {text}")
+        if exprText.startswith("("):
+            text = text[1:]
+        if exprText.endswith(")"):
+            text = text[:-1]
+        # print(f" after {text}")
+        text = text.replace('  ', ' ').strip()
+        # print(f'{text=}')
         parts = text.split(' ')
         classtext = parts[0]
+        # print(f"{classtext=}")
         if "[" in parts[0]:  # an attribute
             classtext = parts[0].strip('"[]')
         op = self.lookup_ogc_expr(parts[1])
