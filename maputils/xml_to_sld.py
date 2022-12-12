@@ -389,6 +389,7 @@ class xml_to_sld(object):
         self.process_expr(filterEl, classtext, exprText)
 
     def process_expr(self, filterEL, classtext, exprText):
+        print(f"{exprText=}")
         exprText = exprText.strip(" ")
         if ' AND ' in exprText:
             self.process_and(exprText, filterEL)
@@ -410,13 +411,20 @@ class xml_to_sld(object):
             # a filter expression
             self.process_regexpr(exprText, filterEL)
             return filterEL
-        else:
-            f = ET.SubElement(filterEL, "PropertyIsEqualTo")
-            prop = ET.SubElement(f, "PropertyName")
-            if classtext:
-                prop.text = classtext.strip('][ ')
-            literal = ET.SubElement(f, "Literal")
-            literal.text = exprText
+        if not classtext and 'eq' in exprText:
+            parts = exprText.split('eq')
+            classtext = parts[0]
+            exprText = parts[1].strip()
+        elif not classtext and '=' in exprText:
+            parts = exprText.split('=')
+            classtext = parts[0]
+            exprText = parts[1].strip()
+        f = ET.SubElement(filterEL, "PropertyIsEqualTo")
+        prop = ET.SubElement(f, "PropertyName")
+        if classtext:
+            prop.text = classtext.strip('][ ')
+        literal = ET.SubElement(f, "Literal")
+        literal.text = exprText
         return filterEL
 
     def process_and(self, exprText, filterEl):
@@ -439,14 +447,17 @@ class xml_to_sld(object):
         # split epxression at OR and recursively call process expression
         index = exprText.find("OR")
         left = exprText[:index]
+        left = left.lstrip(" (")
+        left = left.rstrip(") ")
         left = left.strip(" ")
-        left = left.lstrip("(")
-        left = left.strip(" ")
+        print(f"{left=}")
         self.process_expr(f, None, left)
         right = exprText[index + 2:]
         right = right.strip(" ")
-        right = right.rstrip(")")
+        right = right.rstrip(") ")
+        right = right.lstrip(" (")
         right = right.strip(" ")
+        print(f"{right=}")
         self.process_expr(f, None, right)
 
     def process_list(self, classtext, exprText, filterEL):
@@ -522,17 +533,17 @@ class xml_to_sld(object):
 
     def process_regexpr(self, exprText, filterEL):
         text = exprText.strip()
-        # print(f"before {text}")
+        print(f"before {text}")
         if exprText.startswith("("):
             text = text[1:]
         if exprText.endswith(")"):
             text = text[:-1]
-        # print(f" after {text}")
+        print(f" after {text}")
         text = text.replace('  ', ' ').strip()
-        # print(f'{text=}')
+        print(f'{text=}')
         parts = text.split(' ')
         classtext = parts[0]
-        # print(f"{classtext=}")
+        print(f"{classtext=}")
         if "[" in parts[0]:  # an attribute
             classtext = parts[0].strip('"[]')
         op = self.lookup_ogc_expr(parts[1])
@@ -551,6 +562,7 @@ class xml_to_sld(object):
         return (classtext, text, op)
 
     def lookup_ogc_expr(self, expr):
+        print(f'looking up {expr=}')
         ogc_expr = self.exprs[expr]
         return ogc_expr
 
@@ -599,7 +611,7 @@ class xml_to_sld(object):
             self.process_layer(layer, ns)
 
     def process_layer(self, layer, ns):
-        logging.debug(f"Processing {layer.attrib['name']}")
+        logging.info(f"Processing {layer.attrib['name']}")
         layer_type = layer.attrib['type']
         layer_name = layer.attrib['name']
         # class_item = layer.find('classItem')

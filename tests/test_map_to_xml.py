@@ -104,7 +104,6 @@ class Test_update_mapsource(unittest.TestCase):
 
     @ignore_warnings
     def test_bracketed_expressions(self):
-        logging.basicConfig(level=10)
         instr = """MAP
         LAYER
         NAME "test"
@@ -130,6 +129,58 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(layer is not None)
             literal = sldStore.getLayer(layer).find('.//Literal')
             self.assertEquals("Single Tree Order (Status Unknown)", literal.text)
+
+    @ignore_warnings
+    def test_bracketed_expressions2(self):
+        instr = """MAP
+        LAYER
+                INCLUDE "sdw.inc"
+                DATA "wkb_geometry from (select upper(substr(feature_type,1,1) || substr(gully_owner,1,2) || substr(COALESCE(critical, 'No'),1,1) || CASE (COALESCE(priority_route,'')) WHEN '' THEN 'N' ELSE 'Y' END) AS rendition, gully_id::character varying(6) as gully_ref, * from highways.highway_gullies where status = 'Live') as foo using unique ogc_fid using srid=27700"
+                VALIDATION
+                         qstring '.'
+                END
+                NAME "highway_gullies"
+                STATUS OFF
+                TYPE POINT
+                UNITS METERS
+                LABELITEM "gully_id"
+                CLASS
+                        NAME "Housing Gully"
+                        EXPRESSION ("[rendition]" = "GHONY" or "[rendition]" = "GHOYY" or "[rendition]" = "GHONN" or "[rendition]" = "GHOYN" )
+                        STYLE
+                                SYMBOL "square"
+                                OUTLINECOLOR 0 128 0
+                                OUTLINEWIDTH 2
+                                SIZE 7
+                        END
+                        LABEL
+                                TYPE TrueType
+                                FONT "arialbd"
+                                COLOR 0 128 0
+                                OUTLINECOLOR 255 255 255
+                                SIZE 8
+                                POSITION AUTO
+                                MAXSCALEDENOM 2000
+                                POSITION AUTO
+                        END
+                END
+        END
+        END"""
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        expected = ["GHONY",
+                    "GHOYY",
+                    "GHONN",
+                    "GHOYN"]
+        for layer in sldStore.layers:
+            # print("layer", layer)
+            ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(layer is not None)
+            filter = sldStore.getLayer(layer).find('.//Filter')
+            exprs = filter.findall('.//Literal')
+            for expect, exp in zip(expected, exprs):
+                self.assertEquals(expect, exp.text)
 
     @ ignore_warnings
     def test_opacity(self):
@@ -674,7 +725,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual(expected[layerCount][-1],
                              sldStore.getLayer(layer).find(".//Literal").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_process_expr(self):
         xsld = xml_to_sld.xml_to_sld()
         (classitem, expr,
@@ -696,7 +747,7 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertEqual('"T"', expr)
         self.assertEqual("PropertyIsLessThan", op)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_process_expr_with_space(self):
         xsld = xml_to_sld.xml_to_sld()
         (classitem, expr,
@@ -706,7 +757,7 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertEqual('"Group Order (Not Confirmed)"', expr)
         self.assertEqual("PropertyIsEqualTo", op)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_process_expr_with_or(self):
         xsld = xml_to_sld.xml_to_sld()
         filter = xsld.process_expr(
@@ -719,7 +770,7 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertEqual("3A", literals[0].text)
         self.assertEqual("3B", literals[1].text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_process_expr_with_and(self):
         xsld = xml_to_sld.xml_to_sld()
         filter = xsld.process_expr(
@@ -733,7 +784,7 @@ class Test_update_mapsource(unittest.TestCase):
         self.assertEqual("3A", literals[0].text)
         self.assertEqual("3B", literals[1].text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_complex_in_expressions(self):
         instr = """MAP
             LAYER
@@ -777,7 +828,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("LBII*", literals[1].text)
             self.assertEqual("LBD", literals[2].text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_simple_in_expressions(self):
         instr = """MAP
             LAYER
@@ -818,7 +869,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("LBII", literals[1].text)
             self.assertEqual("LBD", literals[2].text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_list_expressions(self):
         instr = """MAP
             LAYER
@@ -858,7 +909,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEqual("Grade 3a", literals[0].text)
             self.assertEqual("Grade 3b", literals[1].text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_dashed_paths2(self):
         instr = """
         MAP
@@ -887,7 +938,7 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_dashed_paths(self):
         instr = """
         MAP
@@ -928,7 +979,7 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_rotation(self):
         instr = """
         MAP
@@ -973,7 +1024,7 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(rot)
             self.assertTrue(rot.find(".//PropertyName") is not None)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_two_styles(self):
         map = """
         MAP
@@ -1014,7 +1065,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(sldStore.getLayer(layer) is not None)
             self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//LineSymbolizer")))
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_hatching_graphic_rotate(self):
         map = """
         MAP
@@ -1059,7 +1110,7 @@ class Test_update_mapsource(unittest.TestCase):
                 self.assertEquals(None, rot)
                 self.assertEqual(symb, gf[0].find(".//WellKnownName").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_hatching_graphic_fill(self):
         map = """
         MAP
@@ -1097,7 +1148,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
             self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//Stroke")))
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_pattern(self):
         map = """
         MAP
@@ -1130,7 +1181,7 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(sldStore.getLayer(layer) is not None)
             self.assertEquals('.*0..', sldStore.getLayer(layer).find(".//Literal").text)
 
-    @ignore_warnings
+    @ ignore_warnings
     def test_web_process_present(self):
         obs = map_to_xml.map_to_xml(input_file='%s/webproc.map' % self.data_path,
                                     expand_includes=False)
