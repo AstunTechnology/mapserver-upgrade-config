@@ -389,7 +389,7 @@ class xml_to_sld(object):
         self.process_expr(filterEl, classtext, exprText)
 
     def process_expr(self, filterEL, classtext, exprText):
-        print(f"{exprText=}")
+        logging.debug(f"{exprText=}")
         exprText = exprText.strip(" ")
         if ' AND ' in exprText:
             self.process_and(exprText, filterEL)
