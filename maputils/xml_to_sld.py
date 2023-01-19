@@ -241,7 +241,6 @@ class xml_to_sld(object):
                 if (symbol.text == 'HATCH'):
                     s_rot = style.find('.//{http://www.mapserver.org/mapserver}angle')
                     if s_rot is not None:
-                        # print(s_rot.text)
                         if s_rot.text == '45':
                             wkn.text = '/line'
                         elif s_rot.text == '90':
@@ -450,14 +449,14 @@ class xml_to_sld(object):
         left = left.lstrip(" (")
         left = left.rstrip(") ")
         left = left.strip(" ")
-        print(f"{left=}")
+        logging.debug(f"{left=}")
         self.process_expr(f, None, left)
         right = exprText[index + 2:]
         right = right.strip(" ")
         right = right.rstrip(") ")
         right = right.lstrip(" (")
         right = right.strip(" ")
-        print(f"{right=}")
+        logging.debug(f"{right=}")
         self.process_expr(f, None, right)
 
     def process_list(self, classtext, exprText, filterEL):
@@ -533,17 +532,17 @@ class xml_to_sld(object):
 
     def process_regexpr(self, exprText, filterEL):
         text = exprText.strip()
-        print(f"before {text}")
+        logging.debug(f"before {text}")
         if exprText.startswith("("):
             text = text[1:]
         if exprText.endswith(")"):
             text = text[:-1]
-        print(f" after {text}")
+        logging.debug(f" after {text}")
         text = text.replace('  ', ' ').strip()
-        print(f'{text=}')
+        logging.debug(f'{text=}')
         parts = text.split(' ')
         classtext = parts[0]
-        print(f"{classtext=}")
+        logging.debug(f"{classtext=}")
         if "[" in parts[0]:  # an attribute
             classtext = parts[0].strip('"[]')
         op = self.lookup_ogc_expr(parts[1])
@@ -562,7 +561,7 @@ class xml_to_sld(object):
         return (classtext, text, op)
 
     def lookup_ogc_expr(self, expr):
-        print(f'looking up {expr=}')
+        logging.debug(f'looking up {expr=}')
         ogc_expr = self.exprs[expr]
         return ogc_expr
 
