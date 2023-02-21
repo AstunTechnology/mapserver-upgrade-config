@@ -134,7 +134,6 @@ class Test_update_mapsource(unittest.TestCase):
     def test_bracketed_expressions2(self):
         instr = """MAP
         LAYER
-                INCLUDE "sdw.inc"
                 DATA "wkb_geometry from (select upper(substr(feature_type,1,1) || substr(gully_owner,1,2) || substr(COALESCE(critical, 'No'),1,1) || CASE (COALESCE(priority_route,'')) WHEN '' THEN 'N' ELSE 'Y' END) AS rendition, gully_id::character varying(6) as gully_ref, * from highways.highway_gullies where status = 'Live') as foo using unique ogc_fid using srid=27700"
                 VALIDATION
                          qstring '.'

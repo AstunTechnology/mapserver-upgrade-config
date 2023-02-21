@@ -6,7 +6,6 @@ jsonref==0.2
 jsonschema==3.2.0
 lark-parser==0.12.0
 lxml==4.9.1
-mapfile-utils==2.3.7
 mappyfile==0.9.7
 packaging==21.3
 pluggy==1.0.0

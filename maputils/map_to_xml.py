@@ -334,7 +334,7 @@ class map_to_xml(object):
         return new_root
 
     def __init__(self, input_file=None, input_string=None, output_file="",
-                 width=2, tabs=False, expand_includes=True):
+                 width=2, tabs=False, expand_includes=False):
         if not input_file and not input_string:
             return
         if input_file:
@@ -422,7 +422,7 @@ class map_to_xml(object):
         self.map_root = root
 
     def print_map(self):
-        print(ET.tostring(self.map_root, pretty_print=True))
+        print(ET.dump(self.map_root, pretty_print=True))
 
     def fix_nulls(self):
         # convert "is not null" to " != null" and "is null" to " = NULL"
