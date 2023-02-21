@@ -1194,41 +1194,35 @@ class Test_update_mapsource(unittest.TestCase):
     @ ignore_warnings
     def test_nulls(self):
         instr = """
-        MAP
-        LAYER
-    DATA "wkb_geometry from (select *, CASE WHEN development_type = 'House Name Change' THEN 'private' WHEN development_type = 'New Development' THEN developer_name END As private_developer_name, CASE WHEN development_type = 'House Name Change' THEN 'private' WHEN development_type = 'New Development' THEN developer_phone END As private_developer_phone, CASE WHEN development_type = 'House Name Change' THEN 'private' WHEN development_type = 'New Development' THEN developer_email END As private_developer_email FROM LLPG_SCHEMA.new_developments_db where status != 'Archived' AND labeltext = '' OR status != 'Archived' AND labeltext is null) as foo using unique ogc_fid using srid=27700"
-    METADATA
-       "qstring_validation_pattern" "."
-    END
-    NAME "mastermap_carto_text"
-    STATUS OFF
-    TYPE POINT
-    UNITS METERS
-    LABELITEM "textstring"
-    CLASS
-      MAXSCALEDENOM 2500
-      STYLE
-#       OUTLINECOLOR 143 143 143
-#       WIDTH 1
-
-      END
-      LABEL
-        TYPE TrueType
-        FONT "arialbd"
-        COLOR 1 191 254
-#       OUTLINECOLOR 255 255 255
-        ANGLE [orientation]
-        SIZE 7
-        POSITION cr
-      END
-    END
-  END
-        END
-        """
+            MAP
+            LAYER
+                METADATA
+                    "qstring_validation_pattern" "."
+                END
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE POINT
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "Unknown"
+                    EXPRESSION ("[road_status_code]"  = "" )
+                    STYLE
+                        OUTLINECOLOR 0 0 0
+                        WIDTH 3
+                        PATTERN
+                        6 4
+                        END
+                    END
+                END
+            END
+            END
+            """
 
         obs = map_to_xml.map_to_xml(input_string=instr)
         root = obs.map_root
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
-            ET.dump(sldStore.getLayer(layer))
+            # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertIsNotNone(sldStore.getLayer(layer).find('.//Filter/PropertyIsNull'))

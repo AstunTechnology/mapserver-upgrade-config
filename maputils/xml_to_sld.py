@@ -418,12 +418,17 @@ class xml_to_sld(object):
             parts = exprText.split('=')
             classtext = parts[0]
             exprText = parts[1].strip()
-        f = ET.SubElement(filterEL, "PropertyIsEqualTo")
-        prop = ET.SubElement(f, "PropertyName")
+        logging.debug(f"{classtext=}")
         if classtext:
+            f = ET.SubElement(filterEL, "PropertyIsEqualTo")
+            prop = ET.SubElement(f, "PropertyName")
             prop.text = classtext.strip('][ ')
-        literal = ET.SubElement(f, "Literal")
-        literal.text = exprText
+            literal = ET.SubElement(f, "Literal")
+            literal.text = exprText
+        else:
+            f = ET.SubElement(filterEL, "PropertyIsNull")
+            prop = ET.SubElement(f, "PropertyName")
+            prop.text = classtext.strip('][ ')
         return filterEL
 
     def process_and(self, exprText, filterEl):
@@ -547,15 +552,22 @@ class xml_to_sld(object):
             classtext = parts[0].strip('"[]')
         op = self.lookup_ogc_expr(parts[1])
         text = ' '.join(parts[2:])
+        logging.debug(f"{op=} {text=}")
 
         if filterEL is not None:
-            f = ET.SubElement(filterEL, op)
-            prop = ET.SubElement(f, "PropertyName")
-            if classtext:
-                prop.text = classtext.strip("[] ")
-            literal = ET.SubElement(f, "Literal")
-            text = text.strip(' "')
-            literal.text = text.strip('"')
+            if not text:
+                f = ET.SubElement(filterEL, 'PropertyIsNull')
+                prop = ET.SubElement(f, "PropertyName")
+                if classtext:
+                    prop.text = classtext.strip("[] ")
+            else:
+                f = ET.SubElement(filterEL, op)
+                prop = ET.SubElement(f, "PropertyName")
+                if classtext:
+                    prop.text = classtext.strip("[] ")
+                literal = ET.SubElement(f, "Literal")
+                text = text.strip(' "')
+                literal.text = text.strip('"')
 
             # return some values for testing
         return (classtext, text, op)
