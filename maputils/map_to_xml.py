@@ -434,8 +434,8 @@ class map_to_xml(object):
                           r"NOT \1 LIKE \2", line)
 
             line = line.replace("\\", "/")
-            line = line.replace(" is not null", " != null")
-            line = line.replace(" is null", " = null")
+            # line = line.replace(" is not null", " != null")
+            # line = line.replace(" is null", " = null")
             buffer += line
 
         self.input = io.StringIO(buffer)
