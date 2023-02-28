@@ -181,6 +181,7 @@ class map_to_xml(object):
             layer = ET.SubElement(root, "Layer",
                                   name=layers["name"].replace("\"", ""))
             for key in layers.keys():
+                logging.debug(f"MakeLayers: {key=},{layers[key]=}")
                 if "include" == key:
                     # import the file?
                     pass
@@ -192,7 +193,6 @@ class map_to_xml(object):
                     layer.set("type", layers[key])
                 elif "classes" == key:
                     logging.debug("processing classes")
-
                     for s in layers[key]:
                         class_ = ET.SubElement(layer, "Class")
                         for k in s.keys():

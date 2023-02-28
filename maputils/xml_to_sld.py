@@ -10,6 +10,7 @@ from lxml.etree import QName
 # import dicttoxml
 # from xml.dom.minidom import parseString
 import lxml.etree as ET
+from pathlib import PureWindowsPath
 import os
 
 
@@ -178,7 +179,9 @@ class xml_to_sld(object):
     def buildGraphic(self, symbol, graphic, loc):
         eg = ET.SubElement(graphic, "ExternalGraphic")
         onLine = ET.SubElement(eg, "OnlineResource")
-        onLine.text = loc
+        loc_path = PureWindowsPath(loc)
+        onLine.set('{http://www.w3.org/1999/xlink}href', loc_path.as_uri())
+        onLine.set('{http://www.w3.org/1999/xlink}type', 'simple')
         fmt = ET.SubElement(eg, "Format")
         filename, file_extension = os.path.splitext(loc)
         if file_extension == '.png':
@@ -277,6 +280,7 @@ class xml_to_sld(object):
     def getLabel(self, layer, sld, rule, label):
         labelitem = layer.find('{http://www.mapserver.org/mapserver}labelItem')
         text = label.find('{http://www.mapserver.org/mapserver}text')
+        logging.debug(f"got label text {text}")
         if text is None:
             if labelitem is None:
                 return
@@ -286,7 +290,8 @@ class xml_to_sld(object):
             rule = ET.SubElement(sld, "Rule")
         sText = ET.SubElement(rule, "TextSymbolizer")  # add scaledenoms here
         sLabel = ET.SubElement(sText, "Label")
-        sLabel.text = text.text.strip("[] ")
+        prop = ET.SubElement(sLabel, "PropertyName")
+        prop.text = text.text.strip("[] ")
         font = label.find('{http://www.mapserver.org/mapserver}font')
         if font is not None:
             sFont = ET.SubElement(sText, "Font")
@@ -361,10 +366,26 @@ class xml_to_sld(object):
                     pOffset = ET.SubElement(lPlace, "PerpendicularOffset")
                 # I'm guessing here!
                     pOffset.text = offset.attrib['y']
-        # halo
+        else:
+            labPlace = ET.SubElement(sText, "LabelPlacement")
+            if layer.attrib['type'] == 'POINT' or (layer.attrib['type'] == 'POLYGON'):
+                pPlace = ET.SubElement(labPlace, "PointPlacement")
+                anchor = ET.SubElement(pPlace, "AnchorPoint")
+                anchorX = ET.SubElement(anchor, "AnchorPointX")
+                anchorY = ET.SubElement(anchor, "AnchorPointY")
+                anchorX.text = "1.0"
+                anchorY.text = "1.0"
+
+            # halo
         outCol = label.find('{http://www.mapserver.org/mapserver}outlineColor')
         if outCol is not None:
+            outlineWidth = label.find('{http://www.mapserver.org/mapserver}outlineWidth')
             halo = ET.SubElement(sText, "Halo")
+            radius = ET.SubElement(halo, 'Radius')
+            if outlineWidth is None:
+                radius.text = '1'
+            else:
+                radius.text = outlineWidth.text
             fill = ET.SubElement(halo, "Fill")
             col = ET.SubElement(fill, "CssParameter", name="fill")
             self.set_color(col, outCol)
@@ -605,6 +626,7 @@ class xml_to_sld(object):
 
         ns = root.nsmap[None]
 
+        ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
         # for some reason the tree has no namespace on the tags when passed in
         # directly instead of being parsed.
         # so fix it!

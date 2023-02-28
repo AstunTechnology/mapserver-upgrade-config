@@ -1226,3 +1226,94 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
             self.assertIsNotNone(sldStore.getLayer(layer).find('.//Filter/PropertyIsNull'))
+
+    @ ignore_warnings
+    def test_label_position(self):
+        instr = """
+            MAP
+            LAYER
+                METADATA
+                    "qstring_validation_pattern" "."
+                END
+                NAME "mastermap_carto_text"
+                STATUS OFF
+                TYPE POINT
+                UNITS METERS
+                LABELITEM "textstring"
+                CLASS
+                    NAME "Unknown"
+                    EXPRESSION ("[road_status_code]"  = "" )
+                    STYLE
+                        OUTLINECOLOR 0 0 0
+                        WIDTH 3
+                    END
+                    LABEL
+                        COLOR 255 102 102
+                        OUTLINECOLOR 255 255 255
+                        FONT "arialbd"
+                        TYPE truetype
+                        SIZE 12
+                    END
+                END
+            END
+            END
+            """
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        # ET.dump(root)
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            # ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertIsNotNone(sldStore.getLayer(layer).find('.//AnchorPointX'))
+            self.assertIsNotNone(sldStore.getLayer(layer).find('.//Label/PropertyName'))
+
+    @ignore_warnings
+    def test_external_image(self):
+        instr = """
+        MAP
+            SYMBOL
+            NAME "tree"
+            TYPE PIXMAP
+            IMAGE "D:/mapserver/shared/symbols/Legend/landuse_deciduous_green.png"
+        END
+            LAYER
+                NAME "ancient_woodland_2034"
+                TYPE POLYGON
+                STATUS OFF
+                CLASS
+                    NAME ""
+                    STYLE
+                        COLOR 83 104 64
+                        SIZE 10
+                        SYMBOL "tree"
+                        WIDTH 10
+                    END
+                    STYLE
+                        OUTLINECOLOR 0 0 0
+                    END
+                END
+                INCLUDE "sdw.inc"
+                CONNECTIONTYPE POSTGIS
+                DATA "wkb_geometry from (select * FROM draft_lp_2019_2034_schema.ancient_woodland) as foo using unique ogc_fid using srid=27700"
+                METADATA
+                    "ows_title" ""
+                    "ows_abstract" ""
+                END
+                TOLERANCEUNITS PIXELS
+            END
+        END
+        """
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        # ns = root.nsmap  # {'xlink': 'http://www.w3.org/1999/xlink'}
+        ET.dump(root)
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            res = sldStore.getLayer(layer).find('.//OnlineResource')
+            self.assertIsNotNone(res)
+            self.assertEquals(res.attrib.get('{http://www.w3.org/1999/xlink}href'),
+                              'file:///D:/mapserver/shared/symbols/Legend/landuse_deciduous_green.png')
