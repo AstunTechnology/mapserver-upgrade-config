@@ -762,6 +762,7 @@ class Test_update_mapsource(unittest.TestCase):
         filter = xsld.process_expr(
             ET.Element("Filter"), "",
             "( ( [alc_grade] eq 3A ) OR ( [alc_grade] eq 3B ) )")
+        ET.dump(filter)
         properties = filter.findall(".//PropertyName")
         self.assertEqual("alc_grade", properties[0].text)
         self.assertEqual("alc_grade", properties[1].text)
@@ -782,6 +783,53 @@ class Test_update_mapsource(unittest.TestCase):
         literals = filter.findall(".//Literal")
         self.assertEqual("3A", literals[0].text)
         self.assertEqual("3B", literals[1].text)
+
+    @ ignore_warnings
+    def test_broken_expressions(self):
+        instr = """MAP
+        LAYER
+        DATA "wkb_geometry from (select * from osmm.topographicline) as foo using unique ogc_fid using srid=27700"
+        METADATA
+             "qstring_validation_pattern" "."
+        END
+        NAME "mastermap_outline"
+        STATUS OFF
+        TYPE LINE
+        UNITS METERS
+        #       LABELITEM "site_ref"
+        CLASS
+            NAME "Current OS Mapping"
+            EXPRESSION ([featurecode] lt 10112 OR [featurecode] gt 10118)
+            STYLE
+                OUTLINECOLOR 1 191 254
+                WIDTH 0.8
+                #               WIDTH 0.9
+                MAXSCALEDENOM 5000
+            END
+        END
+    END
+        END"""
+
+        obs = map_to_xml.map_to_xml(input_string=instr)
+        root = obs.map_root
+        sldStore = xml_to_sld.xml_to_sld("", root=root)
+        for layer in sldStore.layers:
+            ET.dump(sldStore.getLayer(layer))
+            self.assertTrue(sldStore.getLayer(layer) is not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsLessThan") is
+                not None)
+            self.assertTrue(
+                sldStore.getLayer(layer).find(".//PropertyIsGreaterThan") is
+                not None)
+            properties = sldStore.getLayer(layer).findall(".//PropertyName")
+            self.assertTrue(properties is not None)
+            self.assertEqual("featurecode", properties[0].text)
+            self.assertEqual("featurecode", properties[1].text)
+            literals = sldStore.getLayer(layer).findall(".//Literal")
+            self.assertTrue(literals is not None)
+            self.assertEqual("10112", literals[0].text)
+            self.assertEqual("10118", literals[1].text)
 
     @ ignore_warnings
     def test_complex_in_expressions(self):

@@ -409,8 +409,9 @@ class xml_to_sld(object):
         self.process_expr(filterEl, classtext, exprText)
 
     def process_expr(self, filterEL, classtext, exprText):
-        logging.debug(f"{exprText=}")
+        logging.debug(f"{exprText=} {classtext=}")
         exprText = exprText.strip(" ")
+        op = 'eq'
         if ' AND ' in exprText:
             self.process_and(exprText, filterEL)
             return filterEL
@@ -435,21 +436,42 @@ class xml_to_sld(object):
             parts = exprText.split('eq')
             classtext = parts[0]
             exprText = parts[1].strip()
+            op = 'eq'
         elif not classtext and '=' in exprText:
             parts = exprText.split('=')
             classtext = parts[0]
             exprText = parts[1].strip()
+            op = 'eq'
+        elif not classtext and 'lt' in exprText:
+            idx = exprText.index('lt')
+            classtext = exprText[:idx].strip()
+            exprText = exprText[idx + 2:].strip()
+            op = 'lt'
+        elif not classtext and 'gt' in exprText:
+            idx = exprText.index('gt')
+            classtext = exprText[:idx].strip()
+            exprText = exprText[idx + 2:].strip()
+            op = 'gt'
         logging.debug(f"{classtext=}")
         if classtext:
-            f = ET.SubElement(filterEL, "PropertyIsEqualTo")
+            if op == 'eq':
+                f = ET.SubElement(filterEL, "PropertyIsEqualTo")
+            elif op == 'lt':
+                f = ET.SubElement(filterEL, "PropertyIsLessThan")
+            elif op == 'gt':
+                f = ET.SubElement(filterEL, "PropertyIsGreaterThan")
+            else:
+                logging.error("Unexpected operation in filter " + op)
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext.strip('][ ')
+            if classtext:
+                prop.text = classtext.strip('][ ')
             literal = ET.SubElement(f, "Literal")
             literal.text = exprText
         else:
             f = ET.SubElement(filterEL, "PropertyIsNull")
             prop = ET.SubElement(f, "PropertyName")
-            prop.text = classtext.strip('][ ')
+            if classtext:
+                prop.text = classtext.strip('][ ')
         return filterEL
 
     def process_and(self, exprText, filterEl):
