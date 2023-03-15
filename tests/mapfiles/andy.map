@@ -92,8 +92,7 @@ MAP
 	END
 
 	WEB
-	IMAGEPATH "..\..\..\mapserver\tmp\\" 
-	IMAGEURL ""
+	IMAGEPATH "..\..\..\mapserver\tmp" 
 	TEMPLATE "globexml.xml"
 	METADATA
 	ows_title "Astun Technology Workshop WMS"

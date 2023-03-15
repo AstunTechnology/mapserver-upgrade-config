@@ -92,7 +92,7 @@ MAP
 	END
 
 	WEB
-    IMAGEPATH "D:\MapServer\tmp\\"
+    IMAGEPATH "D:\MapServer\tmp"
     IMAGEURL ""
     TEMPLATE "globexml.xml"
     METADATA

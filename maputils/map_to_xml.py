@@ -338,7 +338,7 @@ class map_to_xml(object):
         if not input_file and not input_string:
             return
         if input_file:
-            self.input = io.open(input_file, 'r', encoding="utf-8")
+            # self.input = io.open(input_file, 'r', encoding="utf-8")
             self.output = output_file
             self.width = width
             self.tabs = tabs
@@ -357,10 +357,9 @@ class map_to_xml(object):
                                    name=input_file, version="5.6")
             # map_ = parser.parse_file(input_file)
 
-            self.fix_nulls()
-            mapp = mappyfile.utils.load(self.input,
-                                        expand_includes=expand_includes)
-            self.input.close()
+            # self.fix_nulls()
+            with open(input_file) as f:
+                mapp = mappyfile.utils.load(f, expand_includes=expand_includes)
         else:
             mapp = mappyfile.utils.loads(input_string,
                                          expand_includes=expand_includes)
