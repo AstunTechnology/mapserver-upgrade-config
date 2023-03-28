@@ -66,7 +66,7 @@ class xml_to_sld(object):
         if isLine and color is None:
             color = style.find('.//{http://www.mapserver.org/mapserver}color')
             logging.debug(f"color = {color}")
-        if color is None:
+        if color is None and not in_graphic:
             symbol.remove(stroke)
             return
         stroke_color = ET.SubElement(stroke, "CssParameter", name="stroke")

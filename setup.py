@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='mapfile-utils',
-      version='2.4.7',
+      version='2.4.8',
       description='Useful scripts for mapfile manipulation',
       url='',
       author='Ian Turton',

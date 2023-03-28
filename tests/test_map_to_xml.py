@@ -1148,11 +1148,12 @@ class Test_update_mapsource(unittest.TestCase):
             sldStore = xml_to_sld.xml_to_sld("", root=root)
             for layer in sldStore.layers:
                 self.assertTrue(sldStore.getLayer(layer) is not None)
-                # ET.dump(sldStore.getLayer(layer))
+                ET.dump(sldStore.getLayer(layer))
                 gf = sldStore.getLayer(layer).findall(".//GraphicFill")
                 self.assertEquals(1, len(gf))
                 self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
-                self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//Stroke")))
+                self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
+                self.assertIsNotNone(gf[0].find(".//Stroke"))
                 rot = sldStore.getLayer(layer).find(".//Rotation")
                 self.assertEquals(None, rot)
                 self.assertEqual(symb, gf[0].find(".//WellKnownName").text)
@@ -1193,7 +1194,7 @@ class Test_update_mapsource(unittest.TestCase):
             # ET.dump(sldStore.getLayer(layer))
             self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//GraphicFill")))
             self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
-            self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//Stroke")))
+            self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
 
     @ ignore_warnings
     def test_pattern(self):
