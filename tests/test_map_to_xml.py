@@ -38,7 +38,7 @@ class Test_update_mapsource(unittest.TestCase):
 
     @ignore_warnings
     def test_read_sql(self):
-        map = """
+        map = r"""
         MAP
           LAYER
     NAME "PlanApp_2000_2009"
@@ -67,7 +67,9 @@ class Test_update_mapsource(unittest.TestCase):
         obs = map_to_xml.map_to_xml(input_string=map)
         root = obs.map_root
         self.assertTrue(root is not None)
-        print(ET.tostring(root, pretty_print=True))
+        ET.dump(root, pretty_print=True)
+        logging.debug(root.find(".//Data").text)
+        self.assertTrue('"CaseFullRef"' in root.find(".//Data").text)
 
     @ignore_warnings
     def test_polygon_mark_fill(self):

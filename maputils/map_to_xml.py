@@ -179,7 +179,7 @@ class map_to_xml(object):
     def makeLayers(self, root, mapp, mapkey):
         for layers in mapp[mapkey]:
             layer = ET.SubElement(root, "Layer",
-                                  name=layers["name"].replace("\"", ""))
+                                  name=layers["name"].replace('"', ""))
             for key in layers.keys():
                 logging.debug(f"MakeLayers: {key=},{layers[key]=}")
                 if "include" == key:
@@ -233,8 +233,11 @@ class map_to_xml(object):
                         item.text = k[1].replace("'", "").replace("\"", "")
 
                 elif "data" == key:
+                    logging.debug(f"Processing data {layers['data']}")
                     data = ET.SubElement(layer, "Data")
-                    data.text = CDATA(layers["data"][0])
+                    dtext = layers["data"][0]
+                    dtext = dtext.replace("\\", '')
+                    data.text = CDATA(dtext)
                 else:
                     self.makeSubElement(layer, layers, key)
             layer = self.sortChildren(layer, layer)
@@ -379,7 +382,7 @@ class map_to_xml(object):
 
     def parse(self, mapp):
         root = self.getroot()
-        # logging.debug(f"got {mapp}")
+        logging.debug(f"got {mapp}")
         # mapp = mapp[0]
         for mapkey in mapp:
             logging.debug(f"got map key: {mapkey}")
