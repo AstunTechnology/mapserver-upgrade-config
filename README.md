@@ -9,12 +9,28 @@ Fetch latest egg file from dist directory and run (e.g.) `easy_install mapfile_u
 
 ## Development
 
-    sudo python setup.py install
+* Clone the repo, change to the directory, create and activate a virtual environment.
+* Install the repo as an editable package and install dependencies:
+```sh
+pip install -e .
+pip install -r requirements
+```
 
 To run the tests use:
 
-    python -m unittest tests/test_map_to_xml.py
+```sh
+python -m unittest --failfast tests/test_map_to_xml.py
+```
     
+### Build a new release
+
+* Update version number in `setup.py`
+* Run `python setup.py bdist_wheel`
+* Test by installing into another fresh virtual environment
+* Add to repo via `git add --force dist/mapfile_utils-X.X.X-py3-none-any.whl`
+  (replace `X.X.X` with the version number)
+* Push to remote
+
 ## Usage
 
     fix-map [-o|--outputfile outputfile] [-t|-w int] inputfile
