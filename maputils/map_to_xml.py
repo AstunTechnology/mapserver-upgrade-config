@@ -235,7 +235,10 @@ class map_to_xml(object):
                 elif "data" == key:
                     logging.debug(f"Processing data {layers['data']}")
                     data = ET.SubElement(layer, "Data")
-                    dtext = layers["data"][0]
+                    if isinstance(layers["data"], str):
+                        dtext = layers["data"]
+                    else:
+                        dtext = layers["data"][0]
                     dtext = dtext.replace("\\", '')
                     data.text = CDATA(dtext)
                 else:
