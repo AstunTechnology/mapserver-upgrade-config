@@ -130,7 +130,7 @@ class Test_update_mapsource(unittest.TestCase):
             ET.dump(sldStore.getLayer(layer))
             self.assertTrue(layer is not None)
             literal = sldStore.getLayer(layer).find('.//Literal')
-            self.assertEquals("Single Tree Order (Status Unknown)", literal.text)
+            self.assertEqual("Single Tree Order (Status Unknown)", literal.text)
 
     @ignore_warnings
     def test_bracketed_expressions2(self):
@@ -181,7 +181,7 @@ class Test_update_mapsource(unittest.TestCase):
             filter = sldStore.getLayer(layer).find('.//Filter')
             exprs = filter.findall('.//Literal')
             for expect, exp in zip(expected, exprs):
-                self.assertEquals(expect, exp.text)
+                self.assertEqual(expect, exp.text)
 
     @ ignore_warnings
     def test_opacity(self):
@@ -309,7 +309,7 @@ class Test_update_mapsource(unittest.TestCase):
         obs = map_to_xml.map_to_xml(input_string=instr)
         root = obs.map_root
         # ET.dump(root)
-        self.assertEquals(2, len(root.findall(".//Style")))
+        self.assertEqual(2, len(root.findall(".//Style")))
         # print("------------------------------------------")
         sldStore = xml_to_sld.xml_to_sld("", root=root)
         for layer in sldStore.layers:
@@ -394,7 +394,7 @@ class Test_update_mapsource(unittest.TestCase):
                 layer.find(".//ColorMapEntry") is not None)
             expected = ['100', '150', '175', '225']
             for _i, cme in enumerate(sldStore.getLayer(layer).iterfind(".//ColorMapEntry")):
-                self.assertEquals(expected[_i], cme.attrib['quantity'])
+                self.assertEqual(expected[_i], cme.attrib['quantity'])
 
     @ ignore_warnings
     def test_marks(self):
@@ -1152,12 +1152,12 @@ class Test_update_mapsource(unittest.TestCase):
                 self.assertTrue(sldStore.getLayer(layer) is not None)
                 ET.dump(sldStore.getLayer(layer))
                 gf = sldStore.getLayer(layer).findall(".//GraphicFill")
-                self.assertEquals(1, len(gf))
-                self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
-                self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
+                self.assertEqual(1, len(gf))
+                self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//Fill")))
+                self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
                 self.assertIsNotNone(gf[0].find(".//Stroke"))
                 rot = sldStore.getLayer(layer).find(".//Rotation")
-                self.assertEquals(None, rot)
+                self.assertEqual(None, rot)
                 self.assertEqual(symb, gf[0].find(".//WellKnownName").text)
 
     @ ignore_warnings
@@ -1194,9 +1194,9 @@ class Test_update_mapsource(unittest.TestCase):
         for layer in sldStore.layers:
             self.assertTrue(sldStore.getLayer(layer) is not None)
             # ET.dump(sldStore.getLayer(layer))
-            self.assertEquals(1, len(sldStore.getLayer(layer).findall(".//GraphicFill")))
-            self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Fill")))
-            self.assertEquals(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
+            self.assertEqual(1, len(sldStore.getLayer(layer).findall(".//GraphicFill")))
+            self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//Fill")))
+            self.assertEqual(2, len(sldStore.getLayer(layer).findall(".//Stroke")))
 
     @ ignore_warnings
     def test_pattern(self):
@@ -1229,7 +1229,7 @@ class Test_update_mapsource(unittest.TestCase):
         for layer in sldStore.layers:
             # ET.dump(sldStore.getLayer(layer))
             self.assertTrue(sldStore.getLayer(layer) is not None)
-            self.assertEquals('.*0..', sldStore.getLayer(layer).find(".//Literal").text)
+            self.assertEqual('.*0..', sldStore.getLayer(layer).find(".//Literal").text)
 
     @ ignore_warnings
     def test_web_process_present(self):
@@ -1366,5 +1366,5 @@ class Test_update_mapsource(unittest.TestCase):
             self.assertTrue(sldStore.getLayer(layer) is not None)
             res = sldStore.getLayer(layer).find('.//OnlineResource')
             self.assertIsNotNone(res)
-            self.assertEquals(res.attrib.get('{http://www.w3.org/1999/xlink}href'),
+            self.assertEqual(res.attrib.get('{http://www.w3.org/1999/xlink}href'),
                               'file:///D:/mapserver/shared/symbols/Legend/landuse_deciduous_green.png')
